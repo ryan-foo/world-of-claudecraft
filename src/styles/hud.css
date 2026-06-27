@@ -1076,10 +1076,20 @@
     font-weight: bold;
     pointer-events: none;
   }
-  #actionbar {
+  #actionbar,
+  #actionbar2 {
     display: flex;
     gap: 4px;
     padding: 6px;
+  }
+  /* The secondary bar sits just above the primary; a touch tighter so the stack stays compact. */
+  #actionbar2 {
+    padding-bottom: 2px;
+  }
+  /* Mobile keeps the single compact primary bar; the secondary bar's slots stay
+     reachable via their (rebindable) keybinds. */
+  body.mobile-touch #actionbar2 {
+    display: none;
   }
   .action-btn {
     width: 46px;
