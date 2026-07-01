@@ -10992,11 +10992,12 @@ function abilityRequirementLines(def: AbilityDef): string[] {
   return lines;
 }
 
-// Builds the `$d` damage string for an ability tooltip. When `scaling` (the live
-// character's Spell Power / Ranged AP / Attack Power) is given, the BASE damage is
-// shown with the scaling contribution called out as a "(+N)" suffix, e.g.
-// "66 to 74 (+29)", so a caster sees both the base and exactly what their Spell
-// Power adds, and watches it climb as gear changes.
+// Builds the `$d` amount string for an ability tooltip (damage OR healing). When
+// `scaling` (the live character's Spell Power / Ranged AP / Attack Power) is given,
+// the BASE amount is shown with the scaling contribution called out as a "(+N)"
+// suffix, e.g. "66 to 74 (+29)", so a caster or healer sees both the base and
+// exactly what their Spell Power adds, and watches it climb as gear changes.
+// Heals (direct and HoT) scale off Spell Power via abilityDamageBonus.
 function abilityEffectText(res: ResolvedAbility, scaling?: AbilityScaling): string {
   const effects = res.effects;
   // " (+N)" callout for the scaling contribution (Spell Power / Attack Power),
@@ -11048,7 +11049,7 @@ function abilityEffectText(res: ResolvedAbility, scaling?: AbilityScaling): stri
     case 'dot':
       return formatAbilityNumber(secondary.total) + suffix(secondary);
     case 'hot':
-      return formatAbilityNumber(secondary.total);
+      return formatAbilityNumber(secondary.total) + suffix(secondary);
     case 'absorb':
       return formatAbilityNumber(secondary.amount);
     case 'imbue':
