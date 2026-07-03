@@ -1,10 +1,14 @@
 # PRD: Badges of Valor (Endgame Currency and Quartermaster Vendor)
 
-Status: draft v2 (tuning pass applied: no badges from normal dungeons,
-heroic pays 1, raid pays 3; vendor stock fully specified)
+Status: draft v3 (anchor verification pass against release/v0.20.0 on
+2026-07-03: the world-boss precedents cited below live in PR #1034, open
+and not merged; every other cited anchor verified in-tree)
 Owner: design
-Companion doc: `docs/prd/heroic-mythic-dungeons.md` (the primary badge
-earner and the forged-drop system)
+Companion docs: `docs/prd/heroic-mythic-dungeons.md` (the primary badge
+earner and the forged-drop system) and
+`docs/prd/ENDGAME_PHASE1_HANDOFF.md` (the verified phase 1
+implementation handoff: heroic Hollow Crypt plus the badge counter and
+its heroic hook)
 
 ## 1. Summary
 
@@ -50,14 +54,18 @@ so the badge faucet and the difficulty system launch as one loop.
   (`src/sim/sim.ts`), spent in the delve shop
   (`src/sim/content/delves/shop.ts`). Badges follow the same shape: a
   counter, not a bag item.
-- **Daily-gate precedent:** `worldBossDaily` (`src/sim/world_boss.ts`):
-  UTC-day window keyed off the host-provided `utcDay`, no-op when the day
-  is unknown (headless/replay stays reproducible). `delveDaily` is the
-  multi-counter variant.
+- **Daily-gate precedent:** `delveDaily` (in tree: rollover in
+  `refreshDelveDaily`, `src/sim/delves/runs.ts`): UTC-day window keyed off
+  the host-provided `utcDay`, no-op when the day is unknown
+  (headless/replay stays reproducible). `worldBossDaily` is the same
+  pattern arriving with PR #1034 (open, not merged as of 2026-07-03).
 - **Weekly-gate precedent:** `raidLockouts` (per-dungeon expiry ms).
 - **Contributor derivation:** `worldBossContributors()` (hate-table
   contributors, pets credit owners, sorted by entityId for fixed rng
-  order). Badge awards reuse it verbatim.
+  order) ships with PR #1034, not this tree. Until it merges, dungeon
+  badge awards use the existing kill-credit eligibility fan-out in
+  `src/sim/combat/damage.ts` (party members in range, pets credit
+  owners); converge on the #1034 helper when it lands.
 - **Vendor precedent:** NPC vendors with buy/sell and `vendorBuyback`; the
   delve shop shows a non-copper purchase path.
 - **Cosmetic sink with zero new item i18n:** `event_skin_token`
@@ -108,17 +116,19 @@ so the badge faucet and the difficulty system launch as one loop.
 | Heroic dungeon final boss | 1 | 1 paid kill per dungeon per UTC day |
 | Mythic+ clear | 2 (keys 2 to 4), 3 (keys 5 to 9), 4 (key 10+) | shares the heroic daily slot per dungeon (one paid dungeon-kill per day, the higher rate applies) |
 | Nythraxis raid boss | 3 | rides the existing raid lockout (weekly) |
-| World boss (Thunzharr) | 2 | rides the existing `worldBossDaily` loot gate |
+| World boss (Thunzharr) | 2 | rides the `worldBossDaily` loot gate; blocked on PR #1034 (the boss and its gate are not merged) |
 | Delve clear (normal or heroic) | 1 | shares the existing `delveDaily` mark-clear cap |
 
 Rules:
-- Awarded to every eligible **contributor** via the
-  `worldBossContributors` semantics.
+- Awarded to every eligible **contributor**: the PR #1034
+  `worldBossContributors` semantics once it merges; until then, the
+  in-tree kill-credit eligibility fan-out (section 3).
 - The award lands on kill/clear, never on a chest or bonus objective
   (pillar 2). The mythic+ end-of-run chest is a separate gear reward
   (companion PRD); badges do not route through it.
 - When `utcDay` is unknown (offline browser world, headless RL env), gates
-  are not enforced, mirroring `isWorldBossLootEligible`. Offline play is
+  are not enforced, mirroring the `refreshDelveDaily` rule (and PR #1034's
+  `isWorldBossLootEligible`). Offline play is
   non-authoritative, so nothing leaks into the online economy.
 - Faucet model: a daily player clearing 3 heroic/mythic+ dungeons, the
   world boss, and 2 delves earns roughly 8 to 10 per day, plus 3 per week
@@ -182,8 +192,9 @@ serialize / `addPlayer` backfill pattern:
   one paid heroic-or-mythic+ kill per dungeon per UTC day, rolls over on
   `utcDay` change (the `delveDaily` shape).
 
-Raid and world boss sources need no new gate state (they ride existing
-lockouts). Wire: `badges` ships in the owning player's snapshot only
+Raid sources need no new gate state (they ride the existing
+`raidLockouts`); the world boss rides the gate PR #1034 introduces once
+it merges. Wire: `badges` ships in the owning player's snapshot only
 (private, like copper).
 
 ### 5.5 Determinism and architecture invariants
@@ -191,7 +202,7 @@ lockouts). Wire: `badges` ships in the owning player's snapshot only
 - No new randomness: awards are fixed amounts; the cosmetic cache keeps
   its existing server-side `Rng` roll.
 - No `Date.now` in sim logic: the UTC day arrives from the host exactly as
-  it does for `worldBossDaily`.
+  it does for `delveDaily` (and for PR #1034's `worldBossDaily`).
 - New logic is a small module (`src/sim/progression/badges.ts`); the
   quartermaster stock is a declarative record in `src/sim/content/` merged
   by `data.ts`; nothing lands inline in `sim.ts`. Guarded by
@@ -228,10 +239,13 @@ Vitest, new `tests/badges.test.ts`:
 - heroic kill pays 1 once per dungeon per day, 0 after; a mythic+ clear
   consumes the same slot at its higher rate; second dungeon same day still
   pays;
-- raid pays 3 on lockout grant only; world boss pays 2 alongside the
-  existing loot-gate check; delve clear pays 1 under the mark-clear cap;
+- raid pays 3 on lockout grant only; world boss pays 2 alongside its
+  loot-gate check (lands with PR #1034); delve clear pays 1 under the
+  mark-clear cap;
 - gates roll over on `utcDay` change and are inert when `utcDay` is `''`;
-- contributor derivation matches world boss semantics (pets credit owner);
+- contributor derivation matches the kill-credit fan-out semantics (pets
+  credit owner); converge on PR #1034's `worldBossContributors` when it
+  lands;
 - vendor purchase deducts badges, grants the item, rejects on insufficient
   badges or full bags; badge gear is not market-listable;
 - persistence roundtrip: serialize then `addPlayer` restores `badges` and
@@ -245,7 +259,10 @@ IWorld / wire drift; `tests/architecture.test.ts`,
 
 1. **P1, sim core (fable/opus):** counter, `badgeDaily`, award hooks on
    the heroic/mythic+/raid/world-boss/delve paths, persistence, wire,
-   tests. Depends on companion PRD P1 (heroic exists first).
+   tests. Depends on companion PRD P1 (heroic exists first); the
+   world-boss hook additionally waits for PR #1034. The heroic entry
+   slice (counter, daily gate, heroic hook) is specified with verified
+   anchors in `docs/prd/ENDGAME_PHASE1_HANDOFF.md`.
 2. **P2, vendor gear (codex / gpt-5.5 slice):** the 10 items from the 5.3
    table plus all-locale names, quartermaster NPC + stock record, badge
    purchase path, purchase tests. The 5.3 table is the complete spec;

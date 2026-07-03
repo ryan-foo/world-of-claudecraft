@@ -1,10 +1,13 @@
 # PRD: Heroic and Mythic+ Dungeons with Forged Drops
 
-Status: draft v2 (badge amounts synced to badges.md v2; forged-drop
-system fully specified)
+Status: draft v3 (anchor verification pass against release/v0.20.0 on
+2026-07-03: the world-boss references below live in PR #1034, open and
+not merged; every other cited anchor verified in-tree)
 Owner: design
-Companion doc: `docs/prd/badges.md` (heroic/mythic+ is the badge system's
-primary earner)
+Companion docs: `docs/prd/badges.md` (heroic/mythic+ is the badge
+system's primary earner) and `docs/prd/ENDGAME_PHASE1_HANDOFF.md` (the
+verified P1 implementation handoff: slices, hook-point map, string
+inventory, gotchas)
 
 ## 1. Summary
 
@@ -67,13 +70,16 @@ Reused as-is:
   (`src/sim/content/delves/affixes.ts`) already express "modify enemy
   stats and mechanics by tier"; mythic+ affixes are a sibling record set,
   not a delve dependency.
-- **Loot plumbing:** loot tables, personal loot (world boss), need/greed,
-  rarity tiers (`src/sim/loot/`).
+- **Loot plumbing:** loot tables, need/greed, rarity tiers
+  (`src/sim/loot/`); per-contributor personal loot arrives with the
+  PR #1034 world boss.
 - **Move-speed hook:** `Sim.moveSpeedMult()` (`src/sim/sim.ts`) already
   aggregates speed modifiers (fiesta augments contribute `moveSpeedPct`,
   `buff_speed` auras exist). Swiftforged folds in here; no new movement
   code path.
-- **Daily gates:** the `worldBossDaily` / `delveDaily` UTC-day pattern.
+- **Daily gates:** the `delveDaily` UTC-day pattern (in tree:
+  `refreshDelveDaily`, `src/sim/delves/runs.ts`); `worldBossDaily` is the
+  same pattern arriving with PR #1034 (open, not merged).
 - **Ladder:** `src/sim/leaderboard_page.ts` is host-agnostic and
   paginated; best-keystone-level is a new sort key, not a new system.
 
@@ -154,8 +160,10 @@ record in `src/sim/content/` (data, not code):
   same one-paid-kill-per-dungeon-per-day slot as heroic (badges.md 5.1).
 
 ### 5.4 Mythic+ chest (the "few times a day, different slots" reward)
-- End-of-run chest, personal loot per eligible contributor
-  (`worldBossContributors` semantics).
+- End-of-run chest, personal loot per eligible contributor (the PR #1034
+  `worldBossContributors` semantics once it merges; until then, the
+  in-tree kill-credit eligibility fan-out in
+  `src/sim/combat/damage.ts`).
 - Grants one gear piece from the level-20 pool for a **rotating slot
   band**: a seeded weekly rotation cycles which slots the chest favors per
   dungeon (Hollow Crypt week A: waist/feet; week B: helmet/shoulder; and
@@ -325,7 +333,8 @@ Deliberately small:
 
 1. **P1, heroic:** difficulty key on instances, the transform module,
    Hollow Crypt heroic tuning record, badge hook (1/day), tests. Ships
-   value with one dungeon and unblocks badges.md P1.
+   value with one dungeon and unblocks badges.md P1. Fully specified
+   with verified anchors in `docs/prd/ENDGAME_PHASE1_HANDOFF.md`.
 2. **P2, heroic everywhere + forge foundation:** Sunken Bastion and
    Gravewyrm records, heroic bonus tables, the equipment-instance change
    plus the `forge` payload field (5.6), forge rolls on heroic drops.
