@@ -1173,6 +1173,12 @@ export const pl_PL: EnTranslations = {
     "social": {
       "lastSeen": "Ostatnio widziano: {when}",
       "lastSeenNever": "nigdy"
+    },
+    "gathering": {
+      "title": "Gathering",
+      "mining": "Mining",
+      "logging": "Logging",
+      "herbalism": "Herbalism"
     }
   },
   "guide": {
@@ -5660,6 +5666,24 @@ export const pl_PL: EnTranslations = {
       },
       "silverleaf_sickle": {
         "name": "Sierp Srebrnolistny"
+      },
+      "thorium_mining_pick": {
+        "name": "Torowy Kilof Górniczy"
+      },
+      "arcanite_mining_pick": {
+        "name": "Arkanitowy Kilof Górniczy"
+      },
+      "ashwood_axe": {
+        "name": "Siekiera z Jesionu"
+      },
+      "elderwood_axe": {
+        "name": "Siekiera ze Starodrzewu"
+      },
+      "goldleaf_sickle": {
+        "name": "Sierp Złotolistny"
+      },
+      "sunpetal_sickle": {
+        "name": "Sierp Słonecznopłatkowy"
       },
       "bristleback_maul": {
         "name": "Młot Gallowglass"

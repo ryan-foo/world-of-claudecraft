@@ -1173,6 +1173,12 @@ export const ja_JP: EnTranslations = {
     "social": {
       "lastSeen": "最終ログイン: {when}",
       "lastSeenNever": "なし"
+    },
+    "gathering": {
+      "title": "採集",
+      "mining": "採掘",
+      "logging": "伐採",
+      "herbalism": "薬草学"
     }
   },
   "guide": {
@@ -5660,6 +5666,24 @@ export const ja_JP: EnTranslations = {
       },
       "silverleaf_sickle": {
         "name": "銀葉の鎌"
+      },
+      "thorium_mining_pick": {
+        "name": "トリウムの採掘ピック"
+      },
+      "arcanite_mining_pick": {
+        "name": "アーケナイトの採掘ピック"
+      },
+      "ashwood_axe": {
+        "name": "タモ材の斧"
+      },
+      "elderwood_axe": {
+        "name": "古木の斧"
+      },
+      "goldleaf_sickle": {
+        "name": "金葉の鎌"
+      },
+      "sunpetal_sickle": {
+        "name": "陽花弁の鎌"
       },
       "bristleback_maul": {
         "name": "ギャロウグラスの大槌"

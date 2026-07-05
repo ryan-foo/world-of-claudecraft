@@ -1173,6 +1173,12 @@ export const sv_SE: EnTranslations = {
     "social": {
       "lastSeen": "Senast sedd: {when}",
       "lastSeenNever": "aldrig"
+    },
+    "gathering": {
+      "title": "Gathering",
+      "mining": "Mining",
+      "logging": "Logging",
+      "herbalism": "Herbalism"
     }
   },
   "guide": {
@@ -5660,6 +5666,24 @@ export const sv_SE: EnTranslations = {
       },
       "silverleaf_sickle": {
         "name": "Silverbladsskära"
+      },
+      "thorium_mining_pick": {
+        "name": "Toriumhacka"
+      },
+      "arcanite_mining_pick": {
+        "name": "Arkanithacka"
+      },
+      "ashwood_axe": {
+        "name": "Askträdsyxa"
+      },
+      "elderwood_axe": {
+        "name": "Gammelträdsyxa"
+      },
+      "goldleaf_sickle": {
+        "name": "Guldbladsskära"
+      },
+      "sunpetal_sickle": {
+        "name": "Solkronbladsskära"
       },
       "bristleback_maul": {
         "name": "Gallowglass-hammare"

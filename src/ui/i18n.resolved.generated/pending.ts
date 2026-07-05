@@ -10,24 +10,40 @@
 
 export const pending: Record<string, readonly string[]> = {
   "es": [
+    "hudChrome.gathering.herbalism",
+    "hudChrome.gathering.logging",
+    "hudChrome.gathering.mining",
+    "hudChrome.gathering.title",
     "hudChrome.statInfo.desc.critRating",
     "hudChrome.statInfo.desc.hasteRating",
     "hudChrome.statInfo.names.critRating",
     "hudChrome.statInfo.names.hasteRating"
   ],
   "es_ES": [
+    "hudChrome.gathering.herbalism",
+    "hudChrome.gathering.logging",
+    "hudChrome.gathering.mining",
+    "hudChrome.gathering.title",
     "hudChrome.statInfo.desc.critRating",
     "hudChrome.statInfo.desc.hasteRating",
     "hudChrome.statInfo.names.critRating",
     "hudChrome.statInfo.names.hasteRating"
   ],
   "fr_FR": [
+    "hudChrome.gathering.herbalism",
+    "hudChrome.gathering.logging",
+    "hudChrome.gathering.mining",
+    "hudChrome.gathering.title",
     "hudChrome.statInfo.desc.critRating",
     "hudChrome.statInfo.desc.hasteRating",
     "hudChrome.statInfo.names.critRating",
     "hudChrome.statInfo.names.hasteRating"
   ],
   "fr_CA": [
+    "hudChrome.gathering.herbalism",
+    "hudChrome.gathering.logging",
+    "hudChrome.gathering.mining",
+    "hudChrome.gathering.title",
     "hudChrome.statInfo.desc.critRating",
     "hudChrome.statInfo.desc.hasteRating",
     "hudChrome.statInfo.names.critRating",
@@ -35,12 +51,20 @@ export const pending: Record<string, readonly string[]> = {
   ],
   "en_CA": [],
   "it_IT": [
+    "hudChrome.gathering.herbalism",
+    "hudChrome.gathering.logging",
+    "hudChrome.gathering.mining",
+    "hudChrome.gathering.title",
     "hudChrome.statInfo.desc.critRating",
     "hudChrome.statInfo.desc.hasteRating",
     "hudChrome.statInfo.names.critRating",
     "hudChrome.statInfo.names.hasteRating"
   ],
   "de_DE": [
+    "hudChrome.gathering.herbalism",
+    "hudChrome.gathering.logging",
+    "hudChrome.gathering.mining",
+    "hudChrome.gathering.title",
     "hudChrome.statInfo.desc.critRating",
     "hudChrome.statInfo.desc.hasteRating",
     "hudChrome.statInfo.names.critRating",
@@ -51,6 +75,10 @@ export const pending: Record<string, readonly string[]> = {
   "ko_KR": [],
   "ja_JP": [],
   "pt_BR": [
+    "hudChrome.gathering.herbalism",
+    "hudChrome.gathering.logging",
+    "hudChrome.gathering.mining",
+    "hudChrome.gathering.title",
     "hudChrome.statInfo.desc.critRating",
     "hudChrome.statInfo.desc.hasteRating",
     "hudChrome.statInfo.names.critRating",
@@ -58,42 +86,70 @@ export const pending: Record<string, readonly string[]> = {
   ],
   "ru_RU": [],
   "nl_NL": [
+    "hudChrome.gathering.herbalism",
+    "hudChrome.gathering.logging",
+    "hudChrome.gathering.mining",
+    "hudChrome.gathering.title",
     "hudChrome.statInfo.desc.critRating",
     "hudChrome.statInfo.desc.hasteRating",
     "hudChrome.statInfo.names.critRating",
     "hudChrome.statInfo.names.hasteRating"
   ],
   "pl_PL": [
+    "hudChrome.gathering.herbalism",
+    "hudChrome.gathering.logging",
+    "hudChrome.gathering.mining",
+    "hudChrome.gathering.title",
     "hudChrome.statInfo.desc.critRating",
     "hudChrome.statInfo.desc.hasteRating",
     "hudChrome.statInfo.names.critRating",
     "hudChrome.statInfo.names.hasteRating"
   ],
   "id_ID": [
+    "hudChrome.gathering.herbalism",
+    "hudChrome.gathering.logging",
+    "hudChrome.gathering.mining",
+    "hudChrome.gathering.title",
     "hudChrome.statInfo.desc.critRating",
     "hudChrome.statInfo.desc.hasteRating",
     "hudChrome.statInfo.names.critRating",
     "hudChrome.statInfo.names.hasteRating"
   ],
   "tr_TR": [
+    "hudChrome.gathering.herbalism",
+    "hudChrome.gathering.logging",
+    "hudChrome.gathering.mining",
+    "hudChrome.gathering.title",
     "hudChrome.statInfo.desc.critRating",
     "hudChrome.statInfo.desc.hasteRating",
     "hudChrome.statInfo.names.critRating",
     "hudChrome.statInfo.names.hasteRating"
   ],
   "sv_SE": [
+    "hudChrome.gathering.herbalism",
+    "hudChrome.gathering.logging",
+    "hudChrome.gathering.mining",
+    "hudChrome.gathering.title",
     "hudChrome.statInfo.desc.critRating",
     "hudChrome.statInfo.desc.hasteRating",
     "hudChrome.statInfo.names.critRating",
     "hudChrome.statInfo.names.hasteRating"
   ],
   "vi_VN": [
+    "hudChrome.gathering.herbalism",
+    "hudChrome.gathering.logging",
+    "hudChrome.gathering.mining",
+    "hudChrome.gathering.title",
     "hudChrome.statInfo.desc.critRating",
     "hudChrome.statInfo.desc.hasteRating",
     "hudChrome.statInfo.names.critRating",
     "hudChrome.statInfo.names.hasteRating"
   ],
   "da_DK": [
+    "hudChrome.gathering.herbalism",
+    "hudChrome.gathering.logging",
+    "hudChrome.gathering.mining",
+    "hudChrome.gathering.title",
     "hudChrome.statInfo.desc.critRating",
     "hudChrome.statInfo.desc.hasteRating",
     "hudChrome.statInfo.names.critRating",

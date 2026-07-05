@@ -1173,6 +1173,12 @@ export const zh_TW: EnTranslations = {
     "social": {
       "lastSeen": "最後上線: {when}",
       "lastSeenNever": "從未"
+    },
+    "gathering": {
+      "title": "採集",
+      "mining": "採礦",
+      "logging": "伐木",
+      "herbalism": "藥草學"
     }
   },
   "guide": {
@@ -5660,6 +5666,24 @@ export const zh_TW: EnTranslations = {
       },
       "silverleaf_sickle": {
         "name": "銀葉鐮刀"
+      },
+      "thorium_mining_pick": {
+        "name": "釷礦採礦鎬"
+      },
+      "arcanite_mining_pick": {
+        "name": "秘法採礦鎬"
+      },
+      "ashwood_axe": {
+        "name": "白蠟木斧"
+      },
+      "elderwood_axe": {
+        "name": "古木斧"
+      },
+      "goldleaf_sickle": {
+        "name": "金葉鐮刀"
+      },
+      "sunpetal_sickle": {
+        "name": "陽瓣鐮刀"
       },
       "bristleback_maul": {
         "name": "加洛格拉斯戰錘"
