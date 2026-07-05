@@ -3138,6 +3138,12 @@ export const zh_TW: Partial<Record<TranslationKey, string>> = {
   'entities.items.gathering_sickle.name': '採集鐮刀',
   'entities.items.bronze_sickle.name': '青銅鐮刀',
   'entities.items.silverleaf_sickle.name': '銀葉鐮刀',
+  'entities.items.thorium_mining_pick.name': '釷礦採礦鎬',
+  'entities.items.arcanite_mining_pick.name': '秘法採礦鎬',
+  'entities.items.ashwood_axe.name': '白蠟木斧',
+  'entities.items.elderwood_axe.name': '古木斧',
+  'entities.items.goldleaf_sickle.name': '金葉鐮刀',
+  'entities.items.sunpetal_sickle.name': '陽瓣鐮刀',
   // v0.10.0 release fill (Fiesta / skin-select / NPC voices / chat channels / Brightwood Glade)
   'hud.core.chatChannels.add': '新增聊天頻道',
   'hud.core.chatChannels.addTitle': '新增頻道',
@@ -5484,4 +5490,8 @@ export const zh_TW: Partial<Record<TranslationKey, string>> = {
   'hudChrome.calendar.events.delveDay.note': '哈爾文修士在圖上做了標記：宜探坍塌聖物窖。',
   'hudChrome.calendar.events.moongateCommunion.title': '月門共禱',
   'hudChrome.calendar.events.moongateCommunion.note': '朝聖者在月中之月下聚於神廟月門。',
+  'hudChrome.gathering.title': '採集',
+  'hudChrome.gathering.mining': '採礦',
+  'hudChrome.gathering.logging': '伐木',
+  'hudChrome.gathering.herbalism': '藥草學',
 };

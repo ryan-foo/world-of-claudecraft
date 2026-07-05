@@ -1169,6 +1169,12 @@ export const tr_TR: EnTranslations = {
     "social": {
       "lastSeen": "Son görülme: {when}",
       "lastSeenNever": "hiç"
+    },
+    "gathering": {
+      "title": "Gathering",
+      "mining": "Mining",
+      "logging": "Logging",
+      "herbalism": "Herbalism"
     }
   },
   "guide": {
@@ -5656,6 +5662,24 @@ export const tr_TR: EnTranslations = {
       },
       "silverleaf_sickle": {
         "name": "Gümüşyaprak Orağı"
+      },
+      "thorium_mining_pick": {
+        "name": "Toryum Maden Kazması"
+      },
+      "arcanite_mining_pick": {
+        "name": "Arkanit Maden Kazması"
+      },
+      "ashwood_axe": {
+        "name": "Dişbudak Baltası"
+      },
+      "elderwood_axe": {
+        "name": "Kadim Ağaç Baltası"
+      },
+      "goldleaf_sickle": {
+        "name": "Altınyaprak Orağı"
+      },
+      "sunpetal_sickle": {
+        "name": "Güneşyaprağı Orağı"
       },
       "bristleback_maul": {
         "name": "Gallowglass Balyozu"

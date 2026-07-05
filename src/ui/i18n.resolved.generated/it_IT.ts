@@ -1169,6 +1169,12 @@ export const it_IT: EnTranslations = {
     "social": {
       "lastSeen": "Ultimo accesso: {when}",
       "lastSeenNever": "mai"
+    },
+    "gathering": {
+      "title": "Gathering",
+      "mining": "Mining",
+      "logging": "Logging",
+      "herbalism": "Herbalism"
     }
   },
   "guide": {
@@ -5656,6 +5662,24 @@ export const it_IT: EnTranslations = {
       },
       "silverleaf_sickle": {
         "name": "Falcetto Fogliargento"
+      },
+      "thorium_mining_pick": {
+        "name": "Piccone di Torio"
+      },
+      "arcanite_mining_pick": {
+        "name": "Piccone di Arcanite"
+      },
+      "ashwood_axe": {
+        "name": "Ascia di Frassino"
+      },
+      "elderwood_axe": {
+        "name": "Ascia di Legno Antico"
+      },
+      "goldleaf_sickle": {
+        "name": "Falcetto Fogliadoro"
+      },
+      "sunpetal_sickle": {
+        "name": "Falcetto Petalo di Sole"
       },
       "bristleback_maul": {
         "name": "Martello Gallowglass"
