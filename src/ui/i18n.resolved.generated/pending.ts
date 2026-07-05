@@ -10,51 +10,107 @@
 
 export const pending: Record<string, readonly string[]> = {
   "es": [
-    "entities.itemSets.necromancers.bonus4"
+    "entities.itemSets.necromancers.bonus4",
+    "hudChrome.gathering.herbalism",
+    "hudChrome.gathering.logging",
+    "hudChrome.gathering.mining",
+    "hudChrome.gathering.title"
   ],
   "es_ES": [
-    "entities.itemSets.necromancers.bonus4"
+    "entities.itemSets.necromancers.bonus4",
+    "hudChrome.gathering.herbalism",
+    "hudChrome.gathering.logging",
+    "hudChrome.gathering.mining",
+    "hudChrome.gathering.title"
   ],
   "fr_FR": [
-    "entities.itemSets.necromancers.bonus4"
+    "entities.itemSets.necromancers.bonus4",
+    "hudChrome.gathering.herbalism",
+    "hudChrome.gathering.logging",
+    "hudChrome.gathering.mining",
+    "hudChrome.gathering.title"
   ],
   "fr_CA": [
-    "entities.itemSets.necromancers.bonus4"
+    "entities.itemSets.necromancers.bonus4",
+    "hudChrome.gathering.herbalism",
+    "hudChrome.gathering.logging",
+    "hudChrome.gathering.mining",
+    "hudChrome.gathering.title"
   ],
   "en_CA": [],
   "it_IT": [
-    "entities.itemSets.necromancers.bonus4"
+    "entities.itemSets.necromancers.bonus4",
+    "hudChrome.gathering.herbalism",
+    "hudChrome.gathering.logging",
+    "hudChrome.gathering.mining",
+    "hudChrome.gathering.title"
   ],
   "de_DE": [
-    "entities.itemSets.necromancers.bonus4"
+    "entities.itemSets.necromancers.bonus4",
+    "hudChrome.gathering.herbalism",
+    "hudChrome.gathering.logging",
+    "hudChrome.gathering.mining",
+    "hudChrome.gathering.title"
   ],
   "zh_CN": [],
   "zh_TW": [],
   "ko_KR": [],
   "ja_JP": [],
   "pt_BR": [
-    "entities.itemSets.necromancers.bonus4"
+    "entities.itemSets.necromancers.bonus4",
+    "hudChrome.gathering.herbalism",
+    "hudChrome.gathering.logging",
+    "hudChrome.gathering.mining",
+    "hudChrome.gathering.title"
   ],
   "ru_RU": [],
   "nl_NL": [
-    "entities.itemSets.necromancers.bonus4"
+    "entities.itemSets.necromancers.bonus4",
+    "hudChrome.gathering.herbalism",
+    "hudChrome.gathering.logging",
+    "hudChrome.gathering.mining",
+    "hudChrome.gathering.title"
   ],
   "pl_PL": [
-    "entities.itemSets.necromancers.bonus4"
+    "entities.itemSets.necromancers.bonus4",
+    "hudChrome.gathering.herbalism",
+    "hudChrome.gathering.logging",
+    "hudChrome.gathering.mining",
+    "hudChrome.gathering.title"
   ],
   "id_ID": [
-    "entities.itemSets.necromancers.bonus4"
+    "entities.itemSets.necromancers.bonus4",
+    "hudChrome.gathering.herbalism",
+    "hudChrome.gathering.logging",
+    "hudChrome.gathering.mining",
+    "hudChrome.gathering.title"
   ],
   "tr_TR": [
-    "entities.itemSets.necromancers.bonus4"
+    "entities.itemSets.necromancers.bonus4",
+    "hudChrome.gathering.herbalism",
+    "hudChrome.gathering.logging",
+    "hudChrome.gathering.mining",
+    "hudChrome.gathering.title"
   ],
   "sv_SE": [
-    "entities.itemSets.necromancers.bonus4"
+    "entities.itemSets.necromancers.bonus4",
+    "hudChrome.gathering.herbalism",
+    "hudChrome.gathering.logging",
+    "hudChrome.gathering.mining",
+    "hudChrome.gathering.title"
   ],
   "vi_VN": [
-    "entities.itemSets.necromancers.bonus4"
+    "entities.itemSets.necromancers.bonus4",
+    "hudChrome.gathering.herbalism",
+    "hudChrome.gathering.logging",
+    "hudChrome.gathering.mining",
+    "hudChrome.gathering.title"
   ],
   "da_DK": [
-    "entities.itemSets.necromancers.bonus4"
+    "entities.itemSets.necromancers.bonus4",
+    "hudChrome.gathering.herbalism",
+    "hudChrome.gathering.logging",
+    "hudChrome.gathering.mining",
+    "hudChrome.gathering.title"
   ]
 };

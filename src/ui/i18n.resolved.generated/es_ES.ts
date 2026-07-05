@@ -1169,6 +1169,12 @@ export const es_ES: EnTranslations = {
     "social": {
       "lastSeen": "Última conexión: {when}",
       "lastSeenNever": "nunca"
+    },
+    "gathering": {
+      "title": "Gathering",
+      "mining": "Mining",
+      "logging": "Logging",
+      "herbalism": "Herbalism"
     }
   },
   "guide": {
@@ -5656,6 +5662,24 @@ export const es_ES: EnTranslations = {
       },
       "silverleaf_sickle": {
         "name": "Hoz de Hoja de Plata"
+      },
+      "thorium_mining_pick": {
+        "name": "Pico de Minería de Torio"
+      },
+      "arcanite_mining_pick": {
+        "name": "Pico de Minería de Arcanita"
+      },
+      "ashwood_axe": {
+        "name": "Hacha de Fresno"
+      },
+      "elderwood_axe": {
+        "name": "Hacha de Madera Añeja"
+      },
+      "goldleaf_sickle": {
+        "name": "Hoz de Hoja Dorada"
+      },
+      "sunpetal_sickle": {
+        "name": "Hoz de Pétalo Solar"
       },
       "bristleback_maul": {
         "name": "Martillo Gallowglass"

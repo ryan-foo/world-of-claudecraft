@@ -1169,6 +1169,12 @@ export const nl_NL: EnTranslations = {
     "social": {
       "lastSeen": "Laatst gezien: {when}",
       "lastSeenNever": "nooit"
+    },
+    "gathering": {
+      "title": "Gathering",
+      "mining": "Mining",
+      "logging": "Logging",
+      "herbalism": "Herbalism"
     }
   },
   "guide": {
@@ -5656,6 +5662,24 @@ export const nl_NL: EnTranslations = {
       },
       "silverleaf_sickle": {
         "name": "Zilverbladsikkel"
+      },
+      "thorium_mining_pick": {
+        "name": "Thorium Mijnpik"
+      },
+      "arcanite_mining_pick": {
+        "name": "Arcaniet Mijnpik"
+      },
+      "ashwood_axe": {
+        "name": "Essenhouten Bijl"
+      },
+      "elderwood_axe": {
+        "name": "Oudhouten Bijl"
+      },
+      "goldleaf_sickle": {
+        "name": "Goudbladsikkel"
+      },
+      "sunpetal_sickle": {
+        "name": "Zonneblaadjessikkel"
       },
       "bristleback_maul": {
         "name": "Gallowglass-Hamer"
