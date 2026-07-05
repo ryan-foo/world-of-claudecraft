@@ -714,6 +714,10 @@ function applyAbility(ctx: SimContext, p: Entity, meta: PlayerMeta, res: Resolve
     const isSpell = ability.school !== 'physical';
     spendAbilityCost(p, res);
     armAbilityCooldown(p, ability.id, res.cooldown, togglingOff);
+    // On-cast set procs (e.g. Clearcasting) fire when the cast completes, here for the
+    // projectile branch (bolt spells, the caster's main rotation) as at the other two
+    // runEffects sites, not on projectile impact.
+    if (p.kind === 'player') ctx.applySetProcs(p, target, 'spellCast');
     ctx.emit({
       type: 'spellfx',
       sourceId: p.id,
