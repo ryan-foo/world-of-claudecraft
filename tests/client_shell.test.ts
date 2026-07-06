@@ -428,11 +428,12 @@ describe('client HTML shell', () => {
   it('routes the target elite class + name color + combo pips + hostile cue through the elided writers', () => {
     // The two raw writes the four original writers cannot express (the elite class and
     // the hostile/friendly name color) go through the toggleClass / setStyleProp,
-    // and the combo pip `on` toggle through toggleClass. No raw classList/style write
-    // on the target frame survives (those silently collapse the hot-DOM skip rate).
+    // and the combo pip `on` toggle (now on the PLAYER frame: combo points are
+    // character-bound) through toggleClass. No raw classList/style write on either
+    // frame survives (those silently collapse the hot-DOM skip rate).
     expect(hudTs).toContain("this.toggleClass(this.targetFrameEl, 'elite'");
     expect(hudTs).toMatch(/this\.setStyleProp\(\s*this\.targetNameEl,\s*'color',/);
-    expect(hudTs).toContain("this.toggleClass(pips[i] as HTMLElement, 'on', i < points);");
+    expect(hudTs).toContain("this.toggleClass(pips[i] as HTMLElement, 'on', i < p.comboPoints);");
     // The forced-colors hostile cue is a non-color redundant marker on the target
     // name, routed through the same elided toggleClass writer (no raw class write on the
     // per-frame hot path) so it stays write-elided.
@@ -617,11 +618,15 @@ describe('client HTML shell', () => {
     expect(html).toContain(
       "if (!['localhost', '127.0.0.1', '[::1]'].includes(location.hostname)) {",
     );
-    expect(hudTs).toContain("fbq('trackCustom', eventName, data ?? {});");
-    expect(hudTs).toContain(
-      "if (ev.level === 5) trackMetaPixel('ReachedLevel5', { level: ev.level });",
+    expect(hudTs).toContain("if (options) fbq('trackCustom', eventName, data ?? {}, options);");
+    expect(hudTs).toContain("else fbq('trackCustom', eventName, data ?? {});");
+    expect(hudTs).toContain('if (ev.level === 5) {');
+    expect(hudTs).toContain('characterId ? { eventID: `lvl5_$' + '{characterId}` } : undefined');
+    expect(mainTs).toContain("if (options) fbq('trackCustom', eventName, data ?? {}, options);");
+    expect(mainTs).toContain("else fbq('trackCustom', eventName, data ?? {});");
+    expect(mainTs).toContain(
+      'registered.accountId ? { eventID: `acct_$' + '{registered.accountId}` } : undefined',
     );
-    expect(mainTs).toContain("trackMetaPixel('AccountCreated');");
     expect(mainTs).toContain("'GitHubClick'");
     expect(mainTs).toContain("'DiscordClick'");
   });
@@ -1109,14 +1114,25 @@ describe('client HTML shell', () => {
       'max-width: calc(100vw - 32px - env(safe-area-inset-left) - env(safe-area-inset-right));',
     );
     expect(hudMobileCss).toContain(
-      'max-height: calc(100dvh - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom));',
+      'max-height: calc(var(--app-vh) - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom));',
     );
     expect(hudMobileCss).toContain(
       'body.mobile-touch.mobile-more-open #mobile-extra-controls {\n    display: flex;\n    flex-direction: column;\n  }',
     );
-    expect(hudMobileCss).toContain(
-      'body.mobile-touch #mobile-extra-controls .panel-title {\n    min-height: 32px;',
+    // Anchored to the drawer-header rule itself (not just the declarations,
+    // which any rule could carry): the 48px floor must stay on THIS selector.
+    const drawerTitleStart = hudMobileCss.indexOf(
+      'body.mobile-touch #mobile-extra-controls .panel-title {',
     );
+    expect(drawerTitleStart).toBeGreaterThan(-1);
+    const drawerTitleBody = hudMobileCss.slice(
+      drawerTitleStart,
+      hudMobileCss.indexOf('}', drawerTitleStart),
+    );
+    expect(drawerTitleBody).toContain('min-height: 48px;');
+    expect(drawerTitleBody).toContain('margin-bottom: 8px;');
+    expect(drawerTitleBody).toContain('padding-bottom: 6px;');
+    expect(drawerTitleBody).toContain('cursor: move;');
     expect(hudMobileCss).toContain(
       'width: min(560px, calc(100vw - 32px - env(safe-area-inset-left) - env(safe-area-inset-right)));',
     );
@@ -1239,7 +1255,7 @@ describe('client HTML shell', () => {
     // and #market-body keeps a min-height floor; the window itself stays
     // overflow:hidden so #market-body remains the single scroll container.
     expect(hudMobileCss).toContain(
-      'body.mobile-touch #market-window {\n    max-height: calc(100vh - 20px);\n    overflow: hidden;',
+      'body.mobile-touch #market-window {\n    max-height: calc(var(--app-vh) / var(--ui-scale, 1) - 20px);\n    overflow: hidden;',
     );
     expect(hudMobileCss).toContain('body.mobile-touch #market-body {\n    min-height: 96px;');
     expect(marketWindowTs).toContain('buildMarketView'); // pagination + filtering delegated to the core
@@ -1411,7 +1427,7 @@ describe('client HTML shell', () => {
       'body.mobile-touch.mobile-left-handed #mobile-extra-controls {\n    left: 50%;\n    right: auto;',
     );
     expect(hudMobileCss).toContain(
-      'max-height: calc(100dvh - 28px - env(safe-area-inset-top) - env(safe-area-inset-bottom));',
+      'max-height: calc(\n        var(--app-vh) -\n        28px -\n        env(safe-area-inset-top) -\n        env(safe-area-inset-bottom)\n      );',
     );
   });
 

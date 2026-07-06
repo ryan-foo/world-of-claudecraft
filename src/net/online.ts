@@ -6,6 +6,7 @@ import {
   runtimeApiOrigin,
   runtimeWebSocketUrl,
 } from '../runtime';
+import { bagCapacity } from '../sim/bags';
 import { signChallenge } from '../sim/client_challenge';
 import type { ChoiceRowLevel } from '../sim/content/choice_rows';
 import { mechChromaItemId, mechChromaSkinIndex } from '../sim/content/skins';
@@ -24,6 +25,7 @@ import { LEADERBOARD_PAGE_SIZE } from '../sim/leaderboard_page';
 import type { Ante, PickAction } from '../sim/lockpick';
 import type { MarketQuery } from '../sim/market_query';
 import { normalizeMoveFacing, sanitizeMoveInput } from '../sim/move_input';
+import { emptyCraftSkills } from '../sim/professions/wheel';
 import { computeQuestState, type ResolvedAbility } from '../sim/sim';
 import {
   type Entity,
@@ -37,6 +39,7 @@ import {
   type PlayerClass,
   type QuestProgress,
   type QuestState,
+  type RiteIntensity,
   type SimEvent,
 } from '../sim/types';
 import {
@@ -45,6 +48,7 @@ import {
   type CharacterSearchResult,
   type ClientCommand,
   type DailyRewardHistory,
+  type DailyRewardLeaderboardPage,
   type DailyRewardSpinResult,
   type DailyRewardStatus,
   type DelveCompanionInfo,
@@ -60,9 +64,11 @@ import {
   type LeaderboardEntry,
   type LeaderboardPage,
   type LockpickView,
+  type MailInfo,
   type MarketInfo,
   type OverheadEmoteId,
   type PartyInfo,
+  type PlayerProfessionsView,
   type PresenceStatus,
   type RaidLockout,
   type SocialInfo,
@@ -151,6 +157,8 @@ export interface ReleaseEntry {
 export interface AccountInfo {
   username: string;
   email: string;
+  // True when the account has no recovery email yet (mandatory-email capture).
+  emailMissing?: boolean;
   createdAt: string;
   characterCount: number;
   twoFactorEnabled: boolean;
@@ -178,6 +186,11 @@ export class Api {
   private static readonly SESSION_KEY = 'woc_session';
   token: string | null = null;
   username: string | null = null;
+  // Whether the signed-in account still needs a recovery email (mandatory-email
+  // capture). Set from the login/register response; undefined until a fresh auth
+  // reports it (a restored/Discord session leaves it undefined, so the caller
+  // confirms via getAccount()). Never persisted; it is a per-session hint only.
+  emailMissing: boolean | undefined = undefined;
   realm: string | null = null;
   // base origin for realm-scoped calls (characters, search, ws). '' = the page
   // origin; set to another realm's origin when the player picks a realm
@@ -254,19 +267,24 @@ export class Api {
   async register(
     username: string,
     password: string,
+    email: string,
     turnstileToken = '',
     ref = '',
     nativeAttestation: unknown = undefined,
-  ): Promise<void> {
+  ): Promise<{ accountId?: number }> {
     const data = await this.post('/api/register', {
       username,
       password,
+      email,
       turnstileToken,
       ref,
       nativeAttestation,
     });
     this.token = data.token;
     this.username = data.username;
+    // A fresh registration always has the mandatory email; trust the server flag.
+    this.emailMissing = data.emailMissing === true;
+    return { accountId: typeof data.accountId === 'number' ? data.accountId : undefined };
   }
 
   // Returns { twoFactorRequired: true } when the account has 2FA on and no code
@@ -291,6 +309,9 @@ export class Api {
     if (data.twoFactorRequired && !data.token) return { twoFactorRequired: true };
     this.token = data.token;
     this.username = data.username;
+    // Pre-email accounts report emailMissing:true so the client can force the
+    // mandatory recovery-email prompt on this sign-in.
+    this.emailMissing = data.emailMissing === true;
     return {};
   }
 
@@ -341,6 +362,7 @@ export class Api {
   clearSession(): void {
     this.token = null;
     this.username = null;
+    this.emailMissing = undefined;
     try {
       localStorage.removeItem(Api.SESSION_KEY);
     } catch {
@@ -379,6 +401,14 @@ export class Api {
   // address and a notice to the old one. The address only changes on verify.
   async changeEmail(password: string, newEmail: string): Promise<void> {
     await this.post('/api/account/email/change', { password, newEmail });
+  }
+
+  // Set the recovery email on an account that has none yet (the mandatory-email
+  // backfill forced on sign-in). Bearer-scoped; the server rejects it once an
+  // address exists. On success the account no longer needs an email.
+  async setInitialEmail(email: string): Promise<void> {
+    await this.post('/api/account/email/set-initial', { email });
+    this.emailMissing = false;
   }
 
   // ── Two-factor (TOTP) ──────────────────────────────────────────────────────
@@ -705,6 +735,7 @@ function blankEntity(id: number): Entity {
     petPath: [],
     petPathCooldown: 0,
     castPushbackReduction: 0,
+    knockbackResistance: 0,
     pos: { x: 0, y: 0, z: 0 },
     prevPos: { x: 0, y: 0, z: 0 },
     facing: 0,
@@ -728,6 +759,9 @@ function blankEntity(id: number): Entity {
     attackPower: 0,
     rangedPower: 0,
     spellPower: 0,
+    meleeHaste: 0,
+    rangedHaste: 0,
+    spellHaste: 0,
     critChance: 0.05,
     dodgeChance: 0.05,
     moveSpeed: 7,
@@ -743,6 +777,7 @@ function blankEntity(id: number): Entity {
     castingAbility: null,
     castRemaining: 0,
     castTotal: 0,
+    castTargetId: null,
     castAim: null,
     channeling: false,
     channelTickTimer: 0,
@@ -752,7 +787,7 @@ function blankEntity(id: number): Entity {
     queuedOnSwing: null,
     fiveSecondRule: 99,
     comboPoints: 0,
-    comboTargetId: null,
+    comboUntil: -1,
     overpowerUntil: -1,
     potionCooldownUntil: -1,
     potionCdRemaining: 0,
@@ -768,8 +803,13 @@ function blankEntity(id: number): Entity {
     tappedById: null,
     pulseTimer: 0,
     stompTimer: 0,
+    bigCastTimer: 0,
+    yelledEngage: false,
     stoneskinTimer: 0,
     terrifyTimer: 0,
+    aoeSlowTimer: 0,
+    loudYellTimer: 0,
+    loudYellIndex: 0,
     detonateTimer: Infinity,
     firedSummons: 0,
     summonedIds: [],
@@ -795,6 +835,7 @@ function blankEntity(id: number): Entity {
     respawnTimer: 0,
     corpseTimer: 0,
     lootFfaTimer: Infinity,
+    harvestClaimedBy: null,
     lootable: false,
     loot: null,
     xpValue: 0,
@@ -803,6 +844,8 @@ function blankEntity(id: number): Entity {
     objectItemId: null,
     dungeonId: null,
     dead: false,
+    ghost: false,
+    corpsePos: null,
     scale: 1,
     color: 0xffffff,
     skinCatalog: 'class',
@@ -828,6 +871,9 @@ export class ClientWorld implements IWorld {
   known: ResolvedAbility[] = [];
   realm = '';
   inventory: InvSlot[] = [];
+  // Equipped bag sockets, mirrored from snapshot self ('bags'); capacity is
+  // derived locally from the shared item data (same math as the sim's bags.ts).
+  bags: (string | null)[] = [null, null, null, null];
   vendorBuyback: InvSlot[] = [];
   equipment: Partial<Record<EquipSlot, string>> = {};
   copper = 0;
@@ -870,6 +916,10 @@ export class ClientWorld implements IWorld {
   // --- IWorldMarket: World Market view, mirrored from the snapshot self
   // (`s.market`, delta-omitted). ---
   marketInfo: MarketInfo | null = null;
+  // --- IWorldMail: Ravenpost mailbox view + unread badge, mirrored from the
+  // snapshot self (`s.mail` / `s.mailU`, delta-omitted). ---
+  mailInfo: MailInfo | null = null;
+  mailUnread = 0;
   // --- IWorldDelves: active delve run + companion + marks/upgrades + daily, all
   // mirrored from the snapshot self (delta-omitted). lockpickState is the exception:
   // it has NO snapshot field and is rebuilt from the lockpick* events by the private
@@ -881,10 +931,30 @@ export class ClientWorld implements IWorld {
   lockpickState: LockpickView | null = null;
   delveMarks = 0;
   companionUpgrades: Record<string, number> = {};
+  // Flat per-craft skill tracking (#1126). NOT yet mirrored over the wire: this
+  // issue lands the sim-side state + persistence only, so online play sees the
+  // all-zero default until the wheel/mass-conservation follow-up wires a self-snap
+  // field the way `dmarks`/`dcomp` do for delveMarks/companionUpgrades above.
+  craftSkills: Record<string, number> = emptyCraftSkills();
   // Per-delve clears (key `${delveId}:${tierId}`), mirrored from the self-wire so
   // delveShopOffers can resolve the shop lock badge client-side.
   delveClears: Record<string, number> = {};
   delveDaily: DelveDailyInfo = { date: '', firstClearXp: [], markClears: 0 };
+  // Gathering profession proficiency (Mining/Logging/Herbalism), the real
+  // read surface for #1119; mirrored from the `prof` wire delta below.
+  // Crafting/secondary professions still contribute nothing until later
+  // issues (#1120/#1125/#1126/#1140) land.
+  professionsState: PlayerProfessionsView = { skills: [] };
+  // Stub for #1121: per-node respawn state is server-authoritative and not yet
+  // wired onto the snapshot (see src/sim/professions/CLAUDE.md), so the client
+  // cannot know another player's, or even its own, real per-node timer yet.
+  // Always reports harvestable; the server re-validates and denies via a
+  // normal error event on an actual attempt, same as every other authoritative
+  // action (see src/net/CLAUDE.md "Never predict an outcome"). Wiring the real
+  // per-player timer is future work once the snapshot carries it.
+  nodeHarvestableByMe(_nodeId: string): boolean {
+    return true;
+  }
   // --- IWorldParty: raid-target marker mirror, from the self-wire `marks` (markerFor
   // reads it, no send). ---
   markers: Record<number, number> = {}; // entityId -> markerId, mirrored from the self-wire
@@ -1327,11 +1397,19 @@ export class ClientWorld implements IWorld {
       e.facing = w.f;
       e.hp = w.hp;
       e.maxHp = w.mhp;
+      // Resource (the target frame's bar): the wire sends it only for entities
+      // that have one, so a missing rtype keeps the blank defaults (no bar).
+      if (w.rtype !== undefined) {
+        e.resourceType = w.rtype;
+        e.resource = w.res;
+        e.maxResource = w.mres;
+      }
       e.rangedPower = w.rp ?? 0;
       e.overheadEmoteId = isOverheadEmoteId(w.emo) ? w.emo : null;
       e.overheadEmoteUntil = e.overheadEmoteId ? Number.POSITIVE_INFINITY : 0;
       if (typeof w.emoSeq === 'number') e.overheadEmoteSeq = w.emoSeq;
       e.dead = nowDead;
+      e.ghost = !!w.gh; // released spirit: rendered translucent, runs faster
       e.lootable = !!w.loot;
       e.hostile = !!w.h;
       e.castingAbility = w.cast ?? null;
@@ -1450,6 +1528,9 @@ export class ClientWorld implements IWorld {
       e.resourceType = s.rtype;
       // delta fields: the server omits them while unchanged, so only the
       // snapshots that carry them rebuild the local structures
+      // corpse position while a ghost (null once resurrected). Delta-guarded: kept
+      // unchanged when the server omits it; drives the corpse marker + resurrect button.
+      if (s.corpse !== undefined) e.corpsePos = s.corpse ?? null;
       if (s.cds !== undefined) {
         // in-place rebuild (same result as `new Map(Object.entries(...))`): no
         // intermediate entry arrays and no Map churn on the 20 Hz self record
@@ -1459,7 +1540,6 @@ export class ClientWorld implements IWorld {
       e.gcdRemaining = s.gcd ?? 0;
       e.potionCdRemaining = s.pcd ?? 0;
       e.comboPoints = s.combo ?? 0;
-      e.comboTargetId = s.comboTgt ?? null;
       e.targetId = s.target ?? null;
       e.autoAttack = !!s.auto;
       e.swingTimer = s.swing ?? e.swingTimer;
@@ -1468,6 +1548,9 @@ export class ClientWorld implements IWorld {
       e.attackPower = s.ap ?? 0;
       e.rangedPower = s.rp ?? 0;
       e.spellPower = s.sp ?? 0;
+      // Spell haste feeds the hasted-cast-time tooltip; melee/ranged haste need
+      // no wiring (the swing timers already ride the snapshot).
+      e.spellHaste = s.sh ?? 0;
       e.critChance = s.crit ?? 0.05;
       e.dodgeChance = s.dodge ?? 0.05;
       e.weapon = s.weapon ?? e.weapon;
@@ -1497,6 +1580,10 @@ export class ClientWorld implements IWorld {
       }
       if (s.buyback !== undefined) {
         this.vendorBuyback = s.buyback;
+        this.invChanged = true;
+      }
+      if (s.bags !== undefined) {
+        this.bags = s.bags;
         this.invChanged = true;
       }
       if (s.equip !== undefined) this.equipment = s.equip;
@@ -1542,6 +1629,8 @@ export class ClientWorld implements IWorld {
       if (s.duel !== undefined) this.duelInfo = s.duel;
       if (s.arena !== undefined) this.arenaInfo = s.arena;
       if (s.market !== undefined) this.marketInfo = s.market;
+      if (s.mail !== undefined) this.mailInfo = s.mail;
+      if (s.mailU !== undefined) this.mailUnread = s.mailU ?? 0;
       if (s.lroll !== undefined) this.lootRollPrompts = s.lroll ?? [];
       if (s.drun !== undefined) this.delveRun = s.drun;
       if (s.dcompanion !== undefined) this.companionState = s.dcompanion;
@@ -1549,6 +1638,7 @@ export class ClientWorld implements IWorld {
       if (s.dcomp !== undefined) this.companionUpgrades = s.dcomp ?? {};
       if (s.dclears !== undefined) this.delveClears = s.dclears ?? {};
       if (s.delveDaily !== undefined) this.delveDaily = s.delveDaily;
+      if (s.prof !== undefined) this.professionsState = s.prof ?? { skills: [] };
       // camera follows server-side facing changes when not mouselooking
       if (prevSelfFacing !== undefined && this.mouselookFacing === null) {
         let d = e.facing - prevSelfFacing;
@@ -1673,6 +1763,12 @@ export class ClientWorld implements IWorld {
   releaseSpirit(): void {
     this.cmd({ cmd: 'release' });
   }
+  resurrectAtCorpse(): void {
+    this.cmd({ cmd: 'resurrect_corpse' });
+  }
+  resurrectAtSpiritHealer(): void {
+    this.cmd({ cmd: 'resurrect_healer' });
+  }
 
   // --- IWorldTargeting: target selection + tab cycling ---
   targetEntity(id: number | null): void {
@@ -1707,6 +1803,12 @@ export class ClientWorld implements IWorld {
   }
   lootCorpse(id: number): void {
     this.cmd({ cmd: 'loot', id });
+  }
+  autoLoot(id: number): void {
+    this.cmd({ cmd: 'autoloot', id });
+  }
+  harvestCorpse(id: number): void {
+    this.cmd({ cmd: 'harvestCorpse', id });
   }
   // --- IWorldLoot: need-greed roll submit + HUD reconcile read ---
   submitLootRoll(rollId: number, choice: LootRollChoice): void {
@@ -1746,6 +1848,15 @@ export class ClientWorld implements IWorld {
   unequipItem(slot: EquipSlot): void {
     this.cmd({ cmd: 'unequip_item', slot });
   }
+  get bagCapacity(): number {
+    return bagCapacity(this.bags);
+  }
+  equipBag(itemId: string, socket?: number): void {
+    this.cmd({ cmd: 'equip_bag', item: itemId, socket });
+  }
+  unequipBag(socket: number): void {
+    this.cmd({ cmd: 'unequip_bag', socket });
+  }
   useItem(itemId: string): void {
     this.cmd({ cmd: 'use', item: itemId });
   }
@@ -1754,6 +1865,9 @@ export class ClientWorld implements IWorld {
   }
   buyItem(npcId: number, itemId: string): void {
     this.cmd({ cmd: 'buy', npc: npcId, item: itemId });
+  }
+  harvestNode(nodeId: string): void {
+    this.cmd({ cmd: 'harvest_node', node: nodeId });
   }
   sellItem(itemId: string, count?: number): void {
     this.cmd({ cmd: 'sell', item: itemId, count });
@@ -1982,6 +2096,12 @@ export class ClientWorld implements IWorld {
   guildDisband(): void {
     this.cmd({ cmd: 'guild_disband' });
   }
+  guildEventCreate(day: string, hour: number | null, title: string, note: string): void {
+    this.cmd({ cmd: 'guild_event_create', day, hour, title, note });
+  }
+  guildEventRemove(eventId: number): void {
+    this.cmd({ cmd: 'guild_event_remove', id: eventId });
+  }
   async searchCharacters(query: string): Promise<CharacterSearchResult[]> {
     const q = query.trim();
     if (!q) return [];
@@ -2018,6 +2138,27 @@ export class ClientWorld implements IWorld {
   }
   marketCollect(): void {
     this.cmd({ cmd: 'market_collect' });
+  }
+  // --- IWorldMail: Ravenpost letter sends (snake_case wire strings). mailInfo /
+  // mailUnread are snapshot reads (mirror fields above). ---
+  mailSend(to: string, subject: string, body: string, copper: number, items: InvSlot[]): void {
+    this.cmd({
+      cmd: 'mail_send',
+      to,
+      subject,
+      body,
+      copper,
+      items: items.map((s) => ({ itemId: s.itemId, count: s.count })),
+    });
+  }
+  mailTake(mailId: number): void {
+    this.cmd({ cmd: 'mail_take', id: mailId });
+  }
+  mailDelete(mailId: number): void {
+    this.cmd({ cmd: 'mail_delete', id: mailId });
+  }
+  mailMarkRead(mailId: number): void {
+    this.cmd({ cmd: 'mail_read', id: mailId });
   }
   // --- IWorldDungeons: dungeon enter/leave sends + the raid-lockout countdown read.
   // selfLockouts mirrors the snapshot `s.lockouts`; raidLockouts derives the live
@@ -2076,6 +2217,9 @@ export class ClientWorld implements IWorld {
   }
   collectDelveChestLoot(chestId: number): void {
     this.cmd({ cmd: 'collect_delve_chest_loot', objectId: chestId });
+  }
+  delveRiteChoose(intensity: RiteIntensity): void {
+    this.cmd({ cmd: 'delve_rite_choose', intensity });
   }
   // Mirror the authoritative lockpick lifecycle into lockpickState. The events
   // still flow to the HUD (drainEvents) for transient feedback (juice/sounds).
@@ -2200,6 +2344,38 @@ export class ClientWorld implements IWorld {
     });
     if (!res.ok) throw new Error('daily rewards unavailable');
     return (await res.json()) as DailyRewardStatus;
+  }
+
+  async dailyRewardLeaderboard(
+    page = 0,
+    pageSize = LEADERBOARD_PAGE_SIZE,
+  ): Promise<DailyRewardLeaderboardPage> {
+    const empty: DailyRewardLeaderboardPage = {
+      day: '',
+      leaders: [],
+      page: 0,
+      pageCount: 1,
+      total: 0,
+      pageSize,
+    };
+    try {
+      const res = await fetch(
+        apiUrl(`/api/daily-rewards/leaderboard?page=${page}&pageSize=${pageSize}`, this.base),
+        { headers: { Authorization: `Bearer ${this.token}` } },
+      );
+      if (!res.ok) return empty;
+      const data = await res.json();
+      return {
+        day: data.day ?? '',
+        leaders: data.leaders ?? [],
+        page: data.page ?? page,
+        pageCount: data.pageCount ?? 1,
+        total: data.total ?? data.leaders?.length ?? 0,
+        pageSize: data.pageSize ?? pageSize,
+      };
+    } catch {
+      return empty;
+    }
   }
 
   async spinDailyReward(): Promise<DailyRewardSpinResult> {

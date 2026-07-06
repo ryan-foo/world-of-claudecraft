@@ -1,5 +1,5 @@
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
-import { join, relative } from 'node:path';
+import { join, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
@@ -135,6 +135,7 @@ const UI_PURE_CORES = [
   'src/ui/raid_lockout_view.ts',
   'src/ui/stat_tooltip_view.ts',
   'src/ui/choice_rows_view.ts',
+  'src/ui/mob_tooltip_view.ts',
   'src/ui/talents_view.ts',
   'src/ui/social_view.ts',
   'src/ui/bags_view.ts',
@@ -143,8 +144,11 @@ const UI_PURE_CORES = [
   'src/ui/vendor_view.ts',
   'src/ui/loot_settings_view.ts',
   'src/ui/market_view.ts',
+  'src/ui/mailbox_view.ts',
+  'src/ui/calendar_view.ts',
   'src/ui/char_view.ts',
   'src/ui/map_window_view.ts',
+  'src/ui/map_quest_list_view.ts',
   'src/ui/arena_window_view.ts',
   'src/ui/leaderboard_view.ts',
   'src/ui/guild_leaderboard_view.ts',
@@ -157,8 +161,10 @@ const UI_PURE_CORES = [
   'src/ui/action_bar_view.ts',
   'src/ui/auras_view.ts',
   'src/ui/minimap_markers.ts',
+  'src/ui/gathering_view.ts',
   'src/ui/fct_core.ts',
   'src/ui/fct_event.ts',
+  'src/ui/window_resize_core.ts',
   'src/ui/focus_order.ts',
   'src/ui/roving_index.ts',
   'src/ui/live_region_politeness.ts',
@@ -173,9 +179,15 @@ const UI_PURE_CORES = [
 // nameplate visibility / anchor / threat / combo model). Each emits state
 // from sim types with no Three import and no i18n, so a NameplatePainter /
 // cast_bar painter draws it and a Vitest drives it directly.
-const RENDER_PURE_CORES = ['src/render/cast_bar.ts', 'src/render/nameplate_view.ts'].map((rel) =>
-  join(repoRoot, rel),
-);
+// terrain_region_core (editor partial-rebuild chunk/texel selection math) and
+// water_core (the shore-depth sample shared by build + editor setLevel) follow
+// the same contract for the map editor's realtime terrain/water edits.
+const RENDER_PURE_CORES = [
+  'src/render/cast_bar.ts',
+  'src/render/nameplate_view.ts',
+  'src/render/terrain_region_core.ts',
+  'src/render/water_core.ts',
+].map((rel) => join(repoRoot, rel));
 
 // Bare-named pure cores: registered cores (from UI_PURE_CORES + RENDER_PURE_CORES)
 // whose basename does NOT end in _view / _core, so the onDiskCores() sweep's

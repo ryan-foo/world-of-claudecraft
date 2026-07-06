@@ -39,6 +39,7 @@ import { type IWorld, OVERHEAD_EMOTES } from '../world_api';
 // Staff/special Discord role -> localized nameplate tag label key.
 const DISCORD_ROLE_TAG_KEYS: Record<string, TranslationKey> = {
   levyst: 'hudChrome.discord.roleTag.levyst',
+  admin: 'hudChrome.discord.roleTag.admin',
   devs: 'hudChrome.discord.roleTag.devs',
   mods: 'hudChrome.discord.roleTag.mods',
   artists: 'hudChrome.discord.roleTag.artists',
@@ -51,6 +52,7 @@ function discordRoleTag(key: string | undefined): string {
 import { castBarState } from './cast_bar';
 import { mobDisplayName, npcDisplayName, objectDisplayName } from './entity_labels';
 import { COMBO_PIP_MAX } from './nameplate_combo';
+import { declutterNameplates, type NameplateAnchor } from './nameplate_declutter';
 import {
   isProjectedNameplateAnchorVisible,
   nameplateScreenTransform,
@@ -72,6 +74,8 @@ export interface NameplatePainterDeps {
   showNameplates: () => boolean;
   /** the player's developer-badge display toggle (glyph + name outline) */
   showDevBadges: () => boolean;
+  /** the player's own-nameplate toggle: render your own plate as others see it */
+  showOwnNameplate: () => boolean;
   /** PvP reaction check, owned by the renderer (duel/arena state) */
   isHostilePlayer: (e: Entity) => boolean;
 }
@@ -83,12 +87,18 @@ export class NameplatePainter {
   private readonly getViewport: () => { width: number; height: number };
   private readonly showNameplates: () => boolean;
   private readonly showDevBadges: () => boolean;
+  private readonly showOwnNameplate: () => boolean;
   private readonly isHostilePlayer: (e: Entity) => boolean;
   // scratch reused every frame (no per-frame alloc); was renderer.tmpV/tmpV2.
   private readonly tmpV = new THREE.Vector3();
   private readonly tmpV2 = new THREE.Vector3();
   // one plan, rewritten per entity by the pure core (allocation-light hot path).
   private readonly plan: NameplatePlan = newNameplatePlan();
+  // reused every frame (truncated via length = 0, not reallocated): this
+  // frame's projected anchors, fed through the declutter pass below so
+  // overlapping nameplates (e.g. two nearby same-named mobs) stack apart
+  // instead of rendering on top of each other.
+  private readonly anchorScratch: NameplateAnchor[] = [];
 
   constructor(deps: NameplatePainterDeps) {
     this.views = deps.views;
@@ -97,6 +107,7 @@ export class NameplatePainter {
     this.getViewport = deps.getViewport;
     this.showNameplates = deps.showNameplates;
     this.showDevBadges = deps.showDevBadges;
+    this.showOwnNameplate = deps.showOwnNameplate;
     this.isHostilePlayer = deps.isHostilePlayer;
   }
 
@@ -109,10 +120,12 @@ export class NameplatePainter {
     const { width: w, height: h } = this.getViewport();
     const showNameplates = this.showNameplates();
     const showDevBadges = this.showDevBadges();
+    const showOwnNameplate = this.showOwnNameplate();
+    this.anchorScratch.length = 0;
     for (const [id, v] of this.views) {
       const e = world.entities.get(id);
       if (!e) continue;
-      const plan = nameplatePlanInto(this.plan, e, p, v.height, showNameplates);
+      const plan = nameplatePlanInto(this.plan, e, p, v.height, showNameplates, showOwnNameplate);
       if (plan.hidden) {
         this.hideNameplate(v);
         continue;
@@ -130,6 +143,7 @@ export class NameplatePainter {
       }
       const sx = (this.tmpV.x * 0.5 + 0.5) * w;
       const sy = (-this.tmpV.y * 0.5 + 0.5) * h;
+      this.anchorScratch.push({ id, sx, sy });
       if (v.nameplateDisplay !== '') {
         v.nameplate.style.display = '';
         v.nameplateDisplay = '';
@@ -184,23 +198,26 @@ export class NameplatePainter {
           '1',
         );
       } else if (e.kind === 'player') {
-        // other players: friendly blue with an hp bar; <Guild> tag under the name.
-        // Self has no overhead nameplate, so its guild line stays hidden too.
+        // Players: friendly blue with an hp bar; <Guild> tag under the name. Your
+        // OWN plate is normally suppressed (suppressSelf), but with the "Show My
+        // Nameplate" option on it renders exactly like another player's, so you can
+        // see your name / level / hp / guild and all your flair the way others do.
+        const suppressSelf = isSelf && !showOwnNameplate;
         const opacity = e.auras.some((a) => a.kind === 'stealth') ? '0.55' : '1';
-        const nameDisplay = isSelf ? 'none' : '';
-        const hpDisplay = e.dead || isSelf ? 'none' : '';
-        const guild = isSelf ? '' : e.guild;
-        // Staff/special Discord role: tint the name + prefix a tag (others only).
-        const roleKey = isSelf ? undefined : e.discordRole;
+        const nameDisplay = suppressSelf ? 'none' : '';
+        const hpDisplay = e.dead || suppressSelf ? 'none' : '';
+        const guild = suppressSelf ? '' : e.guild;
+        // Staff/special Discord role: tint the name + prefix a tag.
+        const roleKey = suppressSelf ? undefined : e.discordRole;
         const roleColor = specialRoleColor(roleKey);
         const roleTag = discordRoleTag(roleKey);
         const displayName = roleTag ? `[${roleTag}] ${e.name}` : e.name;
         // Significant-contributor outline: a glowing outline drawn on top of the
         // existing name color (Discord staff or default) for a high dev tier, so
-        // both read at once. Null for non-significant tiers, for self, and when
-        // the player has turned developer badges off.
+        // both read at once. Null for non-significant tiers, for a suppressed self
+        // plate, and when the player has turned developer badges off.
         const devOutline =
-          isSelf || !showDevBadges ? null : devTierNameOutlineColor(e.devTier ?? 0);
+          suppressSelf || !showDevBadges ? null : devTierNameOutlineColor(e.devTier ?? 0);
         this.setNameplateStatic(
           v,
           `player|${displayName}|${roleColor ?? ''}|${guild}|${nameDisplay}|${hpDisplay}|${opacity}|${devOutline ?? ''}`,
@@ -215,12 +232,12 @@ export class NameplatePainter {
           devOutline,
         );
         v.nameEl.style.display = nameDisplay;
-        // $WOC holder-tier flair, shown on OTHER players (own nameplate is hidden).
-        this.setNameplateTier(v, isSelf ? 0 : (e.holderTier ?? 0));
-        // Developer-badge flair, also OTHER players only.
-        this.setNameplateDevTier(v, isSelf || !showDevBadges ? 0 : (e.devTier ?? 0));
-        // Linked-Discord PFP indicator, also OTHER players only.
-        this.setNameplateDiscord(v, isSelf ? undefined : e.discordAvatar, e.discordName);
+        // $WOC holder-tier flair (hidden only on a suppressed self plate).
+        this.setNameplateTier(v, suppressSelf ? 0 : (e.holderTier ?? 0));
+        // Developer-badge flair.
+        this.setNameplateDevTier(v, suppressSelf || !showDevBadges ? 0 : (e.devTier ?? 0));
+        // Linked-Discord PFP indicator.
+        this.setNameplateDiscord(v, suppressSelf ? undefined : e.discordAvatar, e.discordName);
         this.setNameplateHp(v, e);
       } else if (e.kind === 'npc' || (!e.hostile && e.questIds.length > 0)) {
         const npcName =
@@ -276,6 +293,9 @@ export class NameplatePainter {
               name: mobName,
             });
         const hpDisplay = e.dead ? 'none' : '';
+        // Quest-target marking lives in the mob's hover tooltip (Questie-style
+        // quest + progress lines), not as an overhead glyph: the marker slot
+        // stays the classic lootable '$' / elite diamond pair.
         const marker = e.lootable ? '$' : elite && !e.dead ? '◆' : '';
         // classic "dragon frame" cue: gold bar frame for elites, red for bosses (live mobs only)
         const frame = e.dead ? '' : boss ? 'boss' : elite ? 'elite' : '';
@@ -296,6 +316,21 @@ export class NameplatePainter {
       }
 
       this.updateCastBar(v, e);
+    }
+
+    // Second pass: re-anchor any nameplates that collided during projection
+    // (e.g. two nearby same-named mobs) so they stack apart instead of
+    // rendering fully on top of each other. A no-op for the common case
+    // where nothing overlapped.
+    const declutteredAnchors = declutterNameplates(this.anchorScratch);
+    for (const anchor of declutteredAnchors) {
+      const v = this.views.get(anchor.id);
+      if (v?.nameplateDisplay !== '') continue;
+      const transform = nameplateScreenTransform(anchor.sx, anchor.sy);
+      if (transform !== v.nameplateTransform) {
+        v.nameplate.style.transform = transform;
+        v.nameplateTransform = transform;
+      }
     }
   }
 

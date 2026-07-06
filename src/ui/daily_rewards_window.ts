@@ -27,6 +27,15 @@ export interface DailyRewardsWindowDeps {
   onVisibilityChange?(): void;
   onStatus?(status: DailyRewardStatus): void;
   onWalletConnect?(): void;
+  showChestButton?(): boolean;
+  setShowChestButton?(show: boolean): void;
+  confirmDialog?(
+    title: string,
+    body: string,
+    okText: string,
+    cancelText: string,
+    onOk: () => void,
+  ): void;
 }
 
 export class DailyRewardsWindow {
@@ -142,6 +151,25 @@ export class DailyRewardsWindow {
       ?.addEventListener('click', () => {
         this.deps.onWalletConnect?.();
       });
+    body.querySelector<HTMLButtonElement>('[data-chest-toggle]')?.addEventListener('click', () => {
+      if (this.showChestButton()) {
+        // Hiding the HUD shortcut is easy to trigger by accident amid the task
+        // list and not obviously reversible, so confirm before persisting it.
+        this.deps.confirmDialog?.(
+          t('hudChrome.dailyRewards.hideChestConfirmTitle'),
+          t('hudChrome.dailyRewards.hideChestConfirmBody'),
+          t('hudChrome.dailyRewards.hideChestConfirmOk'),
+          t('hudChrome.dailyRewards.hideChestConfirmCancel'),
+          () => {
+            this.deps.setShowChestButton?.(false);
+            this.paint(view);
+          },
+        );
+        return;
+      }
+      this.deps.setShowChestButton?.(true);
+      this.paint(view);
+    });
   }
 
   private async spin(): Promise<void> {
@@ -196,6 +224,7 @@ export class DailyRewardsWindow {
     const reason = reasonText(view.lockReason);
     return (
       `<p class="dr-intro">${esc(t('hudChrome.dailyRewards.intro'))}</p>` +
+      `<p class="dr-disclaimer">${esc(t('hudChrome.dailyRewards.disclaimer'))}</p>` +
       `<div class="dr-summary">` +
       `<div><span>${esc(t('hudChrome.dailyRewards.prize'))}</span><strong>${esc(prize)}</strong></div>` +
       `<div><span>${esc(t('hudChrome.dailyRewards.reset'))}</span><strong>${esc(reset)}</strong></div>` +
@@ -324,15 +353,35 @@ export class DailyRewardsWindow {
 
   private tasksHtml(view: Extract<DailyRewardsView, { kind: 'ready' }>): string {
     const rows = view.status.tasks
-      .map(
-        (task) =>
-          `<li class="${task.completed ? 'done' : ''}"><span>${esc(task.title)}</span><small>${esc(task.description)}</small><b>${formatNumber(task.points, { maximumFractionDigits: 0 })}</b></li>`,
-      )
+      .map((task) => {
+        const multiplier =
+          typeof task.multiplier === 'number' && Number.isFinite(task.multiplier)
+            ? `<em>${esc(t('hudChrome.dailyRewards.taskMultiplier', { multiplier: formatNumber(task.multiplier, { maximumFractionDigits: 2 }) }))}</em>`
+            : '';
+        return `<li class="${task.completed ? 'done' : ''}"><span>${esc(task.title)}</span><small><span>${esc(task.description)}</span>${multiplier}</small><b>${formatNumber(task.points, { maximumFractionDigits: 0 })}</b></li>`;
+      })
       .join('');
-    return `<section class="dr-section"><h3>${esc(t('hudChrome.dailyRewards.tasks'))}</h3><ul class="dr-tasks">${rows}</ul></section>`;
+    const chestToggle = this.showChestButton()
+      ? t('hudChrome.dailyRewards.hideChestButton')
+      : t('hudChrome.dailyRewards.showChestButton');
+    return (
+      `<section class="dr-section"><h3>${esc(t('hudChrome.dailyRewards.tasks'))}</h3>` +
+      `<ul class="dr-tasks">${rows}</ul>` +
+      `<button type="button" class="lb-page-btn dr-chest-toggle" data-chest-toggle>${esc(chestToggle)}</button>` +
+      `</section>`
+    );
+  }
+
+  private showChestButton(): boolean {
+    return this.deps.showChestButton?.() ?? true;
   }
 
   private leaderboardHtml(status: DailyRewardStatus): string {
+    const totalKey =
+      status.leaderboardTotal === 1
+        ? 'hudChrome.dailyRewards.totalPlayer'
+        : 'hudChrome.dailyRewards.totalPlayers';
+    const total = `<div class="dr-leaderboard-total">${esc(t(totalKey, { count: formatNumber(status.leaderboardTotal, { maximumFractionDigits: 0 }) }))}</div>`;
     const rows =
       status.leaderboard.length === 0
         ? `<div class="dr-empty">${esc(t('hudChrome.dailyRewards.noLeaders'))}</div>`
@@ -342,7 +391,7 @@ export class DailyRewardsWindow {
                 `<div class="dr-rank${row.me ? ' mine' : ''}"><span>${row.rank}</span><b>${esc(row.name)}</b><strong>${formatNumber(row.points, { maximumFractionDigits: 0 })}</strong></div>`,
             )
             .join('');
-    return `<section class="dr-section"><h3>${esc(t('hudChrome.dailyRewards.leaderboard'))}</h3><div class="dr-ranks">${rows}</div></section>`;
+    return `<section class="dr-section"><h3>${esc(t('hudChrome.dailyRewards.leaderboard'))}</h3>${total}<div class="dr-ranks dr-leaderboard-ranks">${rows}</div></section>`;
   }
 
   private historyHtml(history: DailyRewardHistory): string {

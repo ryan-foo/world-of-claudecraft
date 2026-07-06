@@ -4,12 +4,14 @@
 import './styles/index.css';
 import { syncAppViewport as syncAppViewportShared } from './game/app_viewport';
 import { audio } from './game/audio';
+import { AutoLoot } from './game/autoloot';
 import {
   BROWSER_BODY_CLASSES,
   browserBodyClasses,
   cssEffectsTier,
   readBrowserEnv,
 } from './game/browser_env';
+import { isCameraDrivenFacingActive } from './game/camera_driven_facing';
 import { cameraFollowShouldSettle, updateFollowCameraYaw, wrapAngle } from './game/camera_follow';
 import {
   clickMoveShouldWalk,
@@ -19,8 +21,10 @@ import {
   resolveClickMoveAction,
   stepAngleToward,
 } from './game/click_move';
+import { clientEnvBits, installPageStateTracking, pageStateBits } from './game/client_env';
 import { getClientSeed } from './game/client_seed';
 import { initDesktopShellIntegration } from './game/desktop_shell_integration';
+import { takeEditorPlaytestRequest } from './game/editor_playtest';
 import { GamepadManager } from './game/gamepad';
 import { GamepadBindings } from './game/gamepad_bindings';
 import { Input } from './game/input';
@@ -53,6 +57,12 @@ import {
   Settings,
 } from './game/settings';
 import { sfx } from './game/sfx';
+import {
+  recordSkipTap,
+  type SpawnCinematic,
+  spawnCinematicFor,
+  spawnCinematicPose,
+} from './game/spawn_cinematic';
 import { resolveUiEffectsProfile } from './game/ui_effects_profile';
 import { currentUtcDay } from './game/utc_day';
 import { voice } from './game/voice';
@@ -87,12 +97,20 @@ import { navigatorSaveData } from './render/sky';
 import { desktopBridge } from './runtime';
 import { pathCrossesFence } from './sim/colliders';
 import { ABILITIES, CLASSES } from './sim/content/classes';
-import { ITEMS } from './sim/data';
+import { ITEMS, setActiveWorldContent } from './sim/data';
 import { canEquipItem } from './sim/equipment_rules';
 import { findPlayerPath, resolvePlayerDestination } from './sim/pathfind';
 import { Sim } from './sim/sim';
 import { TAB_NEAR_RADIUS, TAB_QUERY_RADIUS, tabConeHalfAt } from './sim/tab_target';
-import { DT, dist2d, INTERACT_RANGE, MELEE_RANGE, type PlayerClass, RUN_SPEED } from './sim/types';
+import {
+  DT,
+  dist2d,
+  INTERACT_RANGE,
+  MELEE_RANGE,
+  type PlayerClass,
+  RUN_SPEED,
+  type WorldContent,
+} from './sim/types';
 import { zoneBiomeAt } from './sim/world';
 import { startSitePresence } from './site_presence';
 import {
@@ -436,10 +454,15 @@ function resetTurnstile(): void {
   if (ts && turnstileWidgetId !== undefined) ts.reset(turnstileWidgetId);
 }
 
-function trackMetaPixel(eventName: string, data?: Record<string, unknown>): void {
+function trackMetaPixel(
+  eventName: string,
+  data?: Record<string, unknown>,
+  options?: Record<string, unknown>,
+): void {
   const fbq = (window as Window & { fbq?: (...args: unknown[]) => void }).fbq;
   if (typeof fbq !== 'function') return;
-  fbq('trackCustom', eventName, data ?? {});
+  if (options) fbq('trackCustom', eventName, data ?? {}, options);
+  else fbq('trackCustom', eventName, data ?? {});
 }
 
 function trackCommunityLinkClicks(): void {
@@ -844,6 +867,7 @@ async function startGame(
   offlineSim: Sim | null,
   online: ClientWorld | null,
   keybindScope: string,
+  playIntro = false,
 ): Promise<void> {
   // Model/texture/HDRI fetches were kicked off at module import; the renderer
   // builds its scene synchronously, so everything must be resolved first.
@@ -946,11 +970,13 @@ async function startGame(
   uiEffectsApplier.applyNow();
   let renderer!: Renderer;
   let hud!: Hud;
+  const autoLoot = new AutoLoot();
   const perf = createPerfMonitor(null);
   try {
     renderer = new Renderer(world, canvas, nameplates);
     renderer.setAudioSink(sfx);
     renderer.showDevBadges = settings.get('showDevBadges');
+    renderer.showOwnNameplate = settings.get('showOwnNameplate');
     // Dev-only: ?targetcone=1 draws the Tab-target front cone on the ground in
     // front of the player, for tuning the targeting angle/radius (tab_target.ts).
     if (import.meta.env.DEV && new URLSearchParams(location.search).get('targetcone') === '1') {
@@ -1138,6 +1164,9 @@ async function startGame(
           case 'leaderboard':
             hud.toggleLeaderboard();
             break;
+          case 'calendar':
+            hud.toggleCalendar();
+            break;
           case 'discord':
             toggleDiscordPanel();
             break;
@@ -1203,9 +1232,15 @@ async function startGame(
   // movement/camera/jump are applied to Input directly by the manager.
   const inputMeter = new InputActivityMeter();
   installInputActivityTracking(inputMeter, window, () => performance.now());
+  installPageStateTracking(window, document);
   const APM_BEAT_MS = 10_000;
   window.setInterval(() => {
-    world.reportTelemetry('apm', { count: inputMeter.drainCount(), periodMs: APM_BEAT_MS });
+    world.reportTelemetry('apm', {
+      count: inputMeter.drainCount(),
+      periodMs: APM_BEAT_MS,
+      env: clientEnvBits(),
+      vis: pageStateBits(),
+    });
   }, APM_BEAT_MS);
   const gamepadBindings = new GamepadBindings();
   const canUseGameKeysNow = () => !hud.isModalOpen() && chatInput.style.display !== 'block';
@@ -1267,6 +1302,9 @@ async function startGame(
       case 'leaderboard':
         hud.toggleLeaderboard();
         break;
+      case 'calendar':
+        hud.toggleCalendar();
+        break;
       case 'discord':
         toggleDiscordPanel();
         break;
@@ -1280,6 +1318,7 @@ async function startGame(
     onInputEdge: () => inputMeter.record(performance.now()),
     isPointerMode: () => hud.isWindowOpen(),
     getPlayerHealth: () => (world.player.dead ? 0 : world.player.hp),
+    onConnectionChange: () => hud.refreshControllerLabels(),
   });
   // The startup apply-all loop (below) calls applySetting('gamepadEnabled', ...)
   // which starts/stops the manager and pushes the saved deadzone/speed/vibration.
@@ -1418,6 +1457,10 @@ async function startGame(
       );
       return;
     }
+    if (key === 'showDailyRewardsChest') {
+      hud.setDailyRewardsChestButtonVisible(settings.set('showDailyRewardsChest', !!value));
+      return;
+    }
     if (key === 'browserEffects') {
       applyBrowserEffects(settings.set('browserEffects', value as number));
       return;
@@ -1437,6 +1480,10 @@ async function startGame(
     }
     if (key === 'showDevBadges') {
       renderer.showDevBadges = settings.set('showDevBadges', !!value);
+      return;
+    }
+    if (key === 'showOwnNameplate') {
+      renderer.showOwnNameplate = settings.set('showOwnNameplate', !!value);
       return;
     }
     if (key === 'invertLookY') {
@@ -1558,6 +1605,15 @@ async function startGame(
       case 'uiScale':
         document.documentElement.style.setProperty('--ui-scale', String(v));
         break;
+      case 'playerFrameScale':
+        document.documentElement.style.setProperty('--player-frame-scale', String(v));
+        break;
+      case 'targetFrameScale':
+        document.documentElement.style.setProperty('--target-frame-scale', String(v));
+        break;
+      case 'aurasOnPlayerFrame':
+        hud.setAurasOnPlayerFrame(!!v);
+        break;
       // Graphics-tier HUD effects follow the STATIC preset + the advanced
       // effectsQuality slider. The 3D renderer tier is resolved at renderer
       // construction (a reload); here we only re-publish the HUD effect profile
@@ -1619,7 +1675,14 @@ async function startGame(
       },
       setPlacement: (on) => perfOverlay.setPlacementMode(on),
     },
-    gamepad: gamepadBindings,
+    gamepad: {
+      entries: () => gamepadBindings.entries(),
+      bind: (button, action) => gamepadBindings.bind(button, action),
+      reset: () => gamepadBindings.reset(),
+      // The connected pad's brand lives on the manager, not the (hardware-agnostic)
+      // bindings, so surface it here for the Controller panel's glyph labels.
+      kind: () => gamepad.getKind(),
+    },
   });
   if (online) {
     hud.attachReporting({
@@ -1703,6 +1766,10 @@ async function startGame(
       }
       if (obj.templateId === 'dungeon_exit') {
         world.leaveDungeon();
+        return;
+      }
+      if (obj.templateId === 'mailbox') {
+        hud.openMailbox();
         return;
       }
       world.pickUpObject(bestObj);
@@ -1790,7 +1857,7 @@ async function startGame(
     // destination (OSRS's yellow "walking here" X) and an entity you target or walk to
     // (OSRS's red interaction X). A plain ground click that only deselects gets nothing.
     const wantClickFeedback = settings.get('clickFeedback') && !world.player.dead;
-    const clickToMove = settings.get('clickToMove') > 0 && !world.player.dead;
+    const clickToMove = settings.get('clickToMove') > 0 && !movementFrozen();
     const clickToMoveButton = normalizeClickMoveButton(settings.get('clickToMoveButton'));
     const isClickMoveButton = clickToMove && button === clickToMoveButton;
     if (id === null) {
@@ -1921,12 +1988,18 @@ async function startGame(
   function playerImmobilized(): boolean {
     return world.player.auras.some((a) => IMMOBILE_AURA_KINDS.has(a.kind));
   }
+  // A released spirit (ghost) moves, turns, and drives the camera like the living; only
+  // a corpse that has not yet released its spirit is frozen. Combat stays gated by
+  // `dead` (and re-validated server-side), so this only unlocks locomotion for ghosts.
+  function movementFrozen(): boolean {
+    return world.player.dead && !world.player.ghost;
+  }
 
   // Pop a "Can't move!" note over the player when a movement command lands while
   // immobilized, so the freeze is legible. Throttled so it doesn't spam per tick.
   let lastImmobileNoteAt = -Infinity;
   function maybeShowImmobileNote(nowMs: number): void {
-    if (world.player.dead || !playerImmobilized()) return;
+    if (movementFrozen() || !playerImmobilized()) return;
     const mi = input.readMoveInput();
     const tryingToMove =
       !!input.clickMoveTarget ||
@@ -2010,9 +2083,11 @@ async function startGame(
   // eases back to zero so the camera settles in behind the character.
   let lastInterpFacing: number | null = null;
   let wasClickMoving = false;
-  // Tracks classic right-mouse mouselook across frames so its falling edge can
-  // commit the final camera yaw to the player facing (see mouselook_release.ts).
-  let prevMouselook = false;
+  // Tracks camera-driven facing (classic right-mouse mouselook, or Mouse Camera
+  // mode while a movement key is held) across frames so its falling edge can
+  // commit the final camera yaw to the player facing (see mouselook_release.ts
+  // and camera_driven_facing.ts).
+  let prevCameraDrivenFacing = false;
   // The release yaw, latched until a sim tick actually commits it. Offline a tick
   // runs on only ~2/3 of frames (60Hz frames, 20Hz ticks), so committing only on
   // the release frame would drop the one-shot when release lands on a zero-tick
@@ -2020,7 +2095,7 @@ async function startGame(
   let pendingReleaseFacing: number | null = null;
   function updateCamera(frameDt: number, interpFacing: number): void {
     const mi = input.readMoveInput();
-    const clickMoving = !!input.clickMoveTarget && !input.suspendMovement && !world.player.dead;
+    const clickMoving = !!input.clickMoveTarget && !input.suspendMovement && !movementFrozen();
     // When click-to-move ends, the player's facing snaps from the (camera-lagging)
     // travel bearing to camYaw in the same frame. lastInterpFacing still holds the
     // old travel bearing, so the rigid follow term would inject that whole stale
@@ -2072,7 +2147,7 @@ async function startGame(
       const action = resolveClickMoveAction(mi, {
         mouselook,
         movementSuspended: input.suspendMovement,
-        playerDead: world.player.dead,
+        playerDead: movementFrozen(),
         enabled: settings.get('clickToMove') > 0 || settings.get('attackMove'),
       });
       if (action === 'cancel') {
@@ -2178,28 +2253,43 @@ async function startGame(
   function updateHoverCursor(): void {
     if (!input.hoverActive || input.isDragging() || hud.isModalOpen()) {
       input.setHoverCursor('default');
+      hud.clearMobHoverTooltip();
       return;
     }
     if (hoverPickGate.shouldPick(input.hoverX, input.hoverY, performance.now())) {
       hoverPickedId = renderer.pick(input.hoverX, input.hoverY);
     }
     const entity = hoverPickedId !== null ? world.entities.get(hoverPickedId) : undefined;
-    input.setHoverCursor(
-      hoverCursorKind(entity, world.playerId, partyMemberIds(), activePvpOpponentIds(world)),
-    );
+    const pvpOpponents = activePvpOpponentIds(world);
+    input.setHoverCursor(hoverCursorKind(entity, world.playerId, partyMemberIds(), pvpOpponents));
+    // WoW-style mouseover tooltip (name / level / creature type) for a mob under
+    // the cursor, reusing the same (gated) pick this function already does for
+    // the hover-cursor kind above; the tooltip content still re-resolves every
+    // frame from live entity state, so counts and death update without a re-pick.
+    if (entity && entity.kind === 'mob' && !entity.dead) {
+      hud.showMobHoverTooltip(entity, pvpOpponents);
+    } else {
+      hud.clearMobHoverTooltip();
+    }
   }
 
   function renderFacingOverride(): number | null {
-    if (input.isMouseCameraMode()) {
-      return cameraMoveActive() ? input.camYaw : null;
-    }
-    return input.isMouselookActive() && !world.player.dead ? input.camYaw : null;
+    // A ghost (dead && ghost) is not movement-frozen and keeps camera-driven
+    // facing; only a corpse-bound dead player loses it, so pass movementFrozen().
+    return isCameraDrivenFacingActive(
+      input.isMouseCameraMode(),
+      cameraMoveActive(),
+      input.isMouselookActive(),
+      movementFrozen(),
+    )
+      ? input.camYaw
+      : null;
   }
 
   function cameraMoveActive(): boolean {
     if (!input.isMouseCameraMode()) return false;
     const mi = input.readMoveInput();
-    return !!(mi.forward || mi.back || mi.strafeLeft || mi.strafeRight) && !world.player.dead;
+    return !!(mi.forward || mi.back || mi.strafeLeft || mi.strafeRight) && !movementFrozen();
   }
 
   // Feed the frame meter every frame (so stats stay warm even when hidden) and,
@@ -2235,8 +2325,9 @@ async function startGame(
     syncPerfOverlay(frameDt, now);
 
     // freeze movement while the game menu is up so WASD doesn't walk the
-    // character behind it (other windows stay non-modal, as before)
-    input.suspendMovement = !gameInputReady || hud.isModalOpen();
+    // character behind it (other windows stay non-modal, as before); the
+    // first-spawn intro cinematic holds movement the same way until it lands
+    input.setSuspendMovement(!gameInputReady || hud.isModalOpen() || intro !== null);
     perf.trace('input.updateTouchLook', () => input.updateTouchLook(frameDt), {
       frameDtMs: frameDt * 1000,
     });
@@ -2244,21 +2335,34 @@ async function startGame(
     perf.trace('input.hoverCursor', () => updateHoverCursor(), { active: input.hoverActive });
     perf.markInputFrame(performance.now());
 
-    const mouselook = input.isMouselookActive() && !world.player.dead;
+    const mouselook = intro === null && input.isMouselookActive() && !movementFrozen();
     const controllerFacing = input.controllerFacingOverride();
     const renderFacing = renderFacingOverride();
-    // On the frame mouselook is released, latch the final camera yaw so the player
-    // facing ends exactly where the camera ended; otherwise the last slice of the
-    // turn is dropped and the character lags the camera. The render/controller
+    // On the frame the camera lets go of the player's heading (classic mouselook
+    // release, OR a Mouse Camera mode move key release), latch the final camera yaw
+    // so the facing ends exactly where the camera ended; otherwise the last slice of
+    // the turn is dropped and the character lags the camera. The render/controller
     // overrides take precedence and reclaim the heading, clearing any stale latch.
-    const edgeReleaseFacing = mouselookReleaseFacing(prevMouselook, mouselook, input.camYaw);
-    prevMouselook = mouselook;
+    const cameraDrivenFacing = isCameraDrivenFacingActive(
+      input.isMouseCameraMode(),
+      cameraMoveActive(),
+      input.isMouselookActive(),
+      movementFrozen(),
+    );
+    const edgeReleaseFacing = mouselookReleaseFacing(
+      prevCameraDrivenFacing,
+      cameraDrivenFacing,
+      input.camYaw,
+    );
+    prevCameraDrivenFacing = cameraDrivenFacing;
     if (renderFacing !== null || controllerFacing !== null) {
       pendingReleaseFacing = null;
     } else if (edgeReleaseFacing !== null) {
       pendingReleaseFacing = edgeReleaseFacing;
     }
-    const movementFacing = !world.player.dead
+    // A ghost (dead && ghost) is not movement-frozen and keeps its facing; only a
+    // corpse-bound dead player (dead && !ghost) loses it.
+    const movementFacing = !movementFrozen()
       ? (renderFacing ?? controllerFacing ?? pendingReleaseFacing)
       : null;
 
@@ -2302,6 +2406,7 @@ async function startGame(
           frameDtMs: frameDt * 1000,
         },
       );
+      introCameraTick(now);
       renderer.camYaw = input.camYaw;
       renderer.camPitch = input.camPitch;
       renderer.camDist = input.camDist;
@@ -2316,6 +2421,7 @@ async function startGame(
       );
       perf.trace('ui.clickMoveMarker', () => updateClickMoveMarker());
       perf.markInputVisible(performance.now());
+      if (settings.get('walkByAutoloot')) autoLoot.run(world, now);
       perf.time('hud', () => perf.trace('hud.update', () => hud.update(), { mode: 'offline' }));
       perf.tick(now);
       return;
@@ -2396,6 +2502,7 @@ async function startGame(
         lastSnapAge: net.lastSnapAt > 0 ? performance.now() - net.lastSnapAt : -1,
       },
     );
+    introCameraTick(now);
     renderer.camYaw = input.camYaw;
     renderer.camPitch = input.camPitch;
     renderer.camDist = input.camDist;
@@ -2421,6 +2528,7 @@ async function startGame(
     perf.trace('ui.clickMoveMarker', () => updateClickMoveMarker());
     maybeShowImmobileNote(now);
     perf.markInputVisible(performance.now());
+    if (settings.get('walkByAutoloot')) autoLoot.run(world, now);
     perf.time('hud', () => perf.trace('hud.update', () => hud.update(), { mode: 'online' }));
     perf.tick(now);
   }
@@ -2436,7 +2544,88 @@ async function startGame(
       input.clearControllerMoveInput();
     },
   };
-  input.suspendMovement = true;
+  // First-spawn intro cinematic: a newly created character's first entry opens
+  // far out across the field and glides in toward the character; the HUD stays
+  // hidden until the camera lands. Escape (or a rapid tap burst on touch, which
+  // has no Escape key) skips straight to the end; other input is swallowed
+  // while it runs. Seen-state persists per character so it plays exactly once;
+  // reduce-motion players go straight to gameplay.
+  const INTRO_SEEN_KEY = `woc_spawn_intro_seen:${keybindScope}`;
+  let introSeen = true;
+  try {
+    introSeen = localStorage.getItem(INTRO_SEEN_KEY) === '1';
+  } catch {
+    // storage unavailable: the seen marker can't persist, so treat the intro as
+    // seen rather than replaying it on every boot
+  }
+  let intro: { cinematic: SpawnCinematic; startedAt: number | null } | null = null;
+  const setIntroUiHidden = (hidden: boolean): void => {
+    const display = hidden ? 'none' : '';
+    const ui = document.getElementById('ui');
+    if (ui) ui.style.display = display;
+    // The touch controls are a top-level layer OUTSIDE #ui, so they need their
+    // own toggle or the joysticks and combat buttons stay up during the intro
+    // on mobile. Clearing to '' hands display back to the stylesheet
+    // (body.mobile-touch.game-active shows it, desktop keeps it hidden).
+    const mobileControls = document.getElementById('mobile-controls');
+    if (mobileControls) mobileControls.style.display = display;
+    nameplates.style.display = display;
+  };
+  const finishIntro = (skipToEnd: boolean): void => {
+    if (!intro) return;
+    const end = intro.cinematic.end;
+    intro = null;
+    if (skipToEnd) {
+      input.camYaw = end.yaw;
+      input.camPitch = end.pitch;
+      input.camDist = end.dist;
+    }
+    setIntroUiHidden(false);
+    window.removeEventListener('keydown', skipIntro, true);
+    window.removeEventListener('pointerdown', skipIntro, true);
+    try {
+      localStorage.setItem(INTRO_SEEN_KEY, '1');
+    } catch {
+      // storage unavailable: worst case the intro replays next session
+    }
+  };
+  const introTaps: number[] = [];
+  const skipIntro = (e: Event): void => {
+    // Swallow gameplay input while the intro runs; only the skip gestures act.
+    e.stopPropagation();
+    if (e.type === 'keydown') {
+      if ((e as KeyboardEvent).key !== 'Escape') return;
+      e.preventDefault(); // skip only: the eaten Escape must not open the menu
+      finishIntro(true);
+      return;
+    }
+    if (recordSkipTap(introTaps, performance.now() / 1000)) finishIntro(true);
+  };
+  // Applied each frame between the follow-camera update and the renderer read,
+  // so the cinematic pose wins over mouse/follow input while it runs.
+  const introCameraTick = (now: number): void => {
+    if (!intro) return;
+    const elapsed = intro.startedAt === null ? 0 : (now - intro.startedAt) / 1000;
+    const pose = spawnCinematicPose(elapsed, intro.cinematic);
+    input.camYaw = pose.yaw;
+    input.camPitch = pose.pitch;
+    input.camDist = pose.dist;
+    if (pose.done) finishIntro(false);
+  };
+  if (playIntro && !introSeen && world.player.level <= 1 && !settings.get('reduceMotion')) {
+    intro = {
+      cinematic: spawnCinematicFor({
+        yaw: input.camYaw,
+        pitch: input.camPitch,
+        dist: input.camDist,
+      }),
+      startedAt: null,
+    };
+    setIntroUiHidden(true);
+    window.addEventListener('keydown', skipIntro, true);
+    window.addEventListener('pointerdown', skipIntro, true);
+  }
+  input.setSuspendMovement(true);
   await nextPaint();
   try {
     await renderer.prewarmInitialScene();
@@ -2450,6 +2639,9 @@ async function startGame(
   requestAnimationFrame(() =>
     requestAnimationFrame(() => {
       hideLoadingScreen();
+      // Start the intro clock as the loading screen begins to fade: the camera
+      // holds the opening pose until now, so the fade doubles as the cut in.
+      if (intro) intro.startedAt = performance.now();
       window.setTimeout(() => {
         gameInputReady = true;
         perf.reset();
@@ -2503,14 +2695,24 @@ function sanitizeOfflineName(raw: string): string {
   return /^[A-Za-z][A-Za-z' -]{1,15}$/.test(stripped) ? stripped : 'Adventurer';
 }
 
-async function startOffline(playerClass: PlayerClass, name: string, skin = 0): Promise<void> {
+async function startOffline(
+  playerClass: PlayerClass,
+  name: string,
+  skin = 0,
+  world?: WorldContent,
+  seedOverride?: number,
+): Promise<void> {
   if (!(await prepareWorldEntry())) return;
   enterLoadingState(t('loading.world'));
+  // Editor play-test: route terrain + props at the custom world too (the renderer
+  // reaches it by module global), in addition to the Sim reading cfg.world.
+  if (world) setActiveWorldContent(world);
   const sim = new Sim({
-    seed: WORLD_SEED,
+    seed: seedOverride ?? WORLD_SEED,
     playerClass,
     playerName: name,
     devCommands: import.meta.env.DEV,
+    world,
   });
   sim.setPlayerSkin(sim.playerId, skin);
   // Dev convenience: ?mech drops an offline session straight into the Combat Mech
@@ -2552,7 +2754,7 @@ async function startOffline(playerClass: PlayerClass, name: string, skin = 0): P
   }
   // Offline characters are not persisted (a fresh name is typed each session),
   // so the only stable handle is class + name. Keybinds scope to that pair.
-  void startGame(sim, sim, null, `offline:${playerClass}:${name}`);
+  void startGame(sim, sim, null, `offline:${playerClass}:${name}`, true);
 }
 
 // ---------------------------------------------------------------------------
@@ -3905,7 +4107,7 @@ async function enterWorld(c: CharacterSummary, button?: HTMLButtonElement): Prom
   const poll = setInterval(() => {
     if (world.connected && world.entities.has(world.playerId)) {
       clearInterval(poll);
-      void startGame(world, null, world, `char:${c.id}`);
+      void startGame(world, null, world, `char:${c.id}`, true);
     } else if (Date.now() - waitStart > 10000) {
       clearInterval(poll);
       world.close();
@@ -4837,7 +5039,7 @@ function showWalletPicker(
     panel.setAttribute('role', 'dialog');
     panel.setAttribute('aria-modal', 'true');
     panel.setAttribute('aria-labelledby', 'wallet-picker-title');
-    panel.setAttribute('aria-describedby', 'wallet-picker-help');
+    panel.setAttribute('aria-describedby', 'wallet-picker-help wallet-picker-extension-help');
 
     const titleRow = document.createElement('div');
     titleRow.className = 'panel-title';
@@ -4855,6 +5057,11 @@ function showWalletPicker(
     help.className = 'wallet-picker-help';
     help.id = 'wallet-picker-help';
     help.textContent = t('wallet.flowConnect');
+
+    const extensionHelp = document.createElement('p');
+    extensionHelp.className = 'wallet-picker-help wallet-picker-extension-help';
+    extensionHelp.id = 'wallet-picker-extension-help';
+    extensionHelp.textContent = t('wallet.extensionHelp');
 
     const list = document.createElement('div');
     list.className = 'wallet-picker-list';
@@ -4894,7 +5101,7 @@ function showWalletPicker(
       }
     }
 
-    panel.append(titleRow, help, list);
+    panel.append(titleRow, help, extensionHelp, list);
     back.appendChild(panel);
     document.body.appendChild(back);
     walletPickerModal = back;
@@ -5670,6 +5877,105 @@ function wireDiscordKeepModal(): void {
   });
 }
 
+// ── Mandatory recovery-email capture modal (#recovery-email-modal) ───────────
+// Shown on sign-in when the signed-in account has no recovery email yet (accounts
+// created before email was mandatory, or a Discord login that returned no address).
+// It is deliberately blocking: the player must set an address or log out, so the
+// backdrop/Escape do NOT close it. The gate awaits the returned promise before
+// entering the realm.
+const EMAIL_SHAPE_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+let recoveryEmailResolve: (() => void) | null = null;
+
+function openRecoveryEmailModal(): Promise<void> {
+  const modal = document.getElementById('recovery-email-modal');
+  if (!modal) return Promise.resolve();
+  const input = document.getElementById('recovery-email-input') as HTMLInputElement | null;
+  const errEl = document.getElementById('recovery-email-error');
+  if (input) input.value = '';
+  if (errEl) errEl.textContent = '';
+  modal.hidden = false;
+  input?.focus();
+  return new Promise<void>((resolve) => {
+    recoveryEmailResolve = resolve;
+  });
+}
+
+function closeRecoveryEmailModal(): void {
+  const modal = document.getElementById('recovery-email-modal');
+  if (modal) modal.hidden = true;
+  const done = recoveryEmailResolve;
+  recoveryEmailResolve = null;
+  done?.();
+}
+
+function wireRecoveryEmailModal(): void {
+  const modal = document.getElementById('recovery-email-modal');
+  if (!modal) return;
+  const input = document.getElementById('recovery-email-input') as HTMLInputElement | null;
+  const errEl = document.getElementById('recovery-email-error');
+  const submit = () => {
+    const email = (input?.value ?? '').trim();
+    // Mirror the server validator so the user gets an inline error before the round
+    // trip (the server re-validates and is the authority).
+    if (!email || email.length > 254 || !EMAIL_SHAPE_RE.test(email)) {
+      if (errEl) errEl.textContent = t('auth.recovery.invalid');
+      input?.focus();
+      return;
+    }
+    if (errEl) errEl.textContent = '';
+    void api
+      .setInitialEmail(email)
+      .then(() => closeRecoveryEmailModal())
+      .catch((err) => {
+        // A 409 means the address was set elsewhere (another tab) between opening
+        // this modal and submitting: there is nothing left to capture, so proceed.
+        if ((err as { status?: number })?.status === 409) {
+          api.emailMissing = false;
+          closeRecoveryEmailModal();
+          return;
+        }
+        if (errEl) errEl.textContent = userFacingApiError(err);
+      });
+  };
+  const logOut = () => {
+    // Escape hatch so the mandatory prompt never traps the player: log out and
+    // return to the login screen. They are prompted again on the next sign-in.
+    void api.logout().catch(() => {});
+    api.clearSession();
+    closeRecoveryEmailModal();
+    enterLoggedOutChrome();
+    switchMainView('#hero-view');
+    show('#login-panel');
+  };
+  document.getElementById('btn-recovery-email-submit')?.addEventListener('click', submit);
+  document.getElementById('btn-recovery-email-logout')?.addEventListener('click', logOut);
+  input?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      submit();
+    }
+  });
+}
+
+// Force the mandatory recovery-email prompt when the signed-in account has no
+// address on file. Fast path: a fresh password login/register set api.emailMissing
+// directly. A Discord or restored session leaves it undefined, so confirm once via
+// getAccount(). Never blocks realm entry on a transient whoami failure.
+async function maybePromptRecoveryEmail(): Promise<void> {
+  if (!api.token) return;
+  if (api.emailMissing === false) return;
+  if (api.emailMissing === undefined) {
+    try {
+      const acct = await api.getAccount();
+      api.emailMissing = acct.emailMissing ?? acct.email.trim() === '';
+    } catch {
+      return;
+    }
+  }
+  if (api.emailMissing !== true) return;
+  await openRecoveryEmailModal();
+}
+
 // ── First-time Discord login chooser persistence (#discord-choice-panel) ─────
 // The OAuth bounce page parks a single-use link token + Discord name here when a
 // first-time login has no account yet; main.ts reads it on boot to show the
@@ -6068,6 +6374,9 @@ function wireStartScreens(): void {
     if (await completeDesktopBrowserLogin()) return;
     void refreshWalletLinkStatus();
     void refreshGithubLinkStatus();
+    // Mandatory recovery-email capture: block realm entry until a pre-email account
+    // sets one (a fresh signup already has it, so this is a no-op there).
+    await maybePromptRecoveryEmail();
     await enterRealmFlow();
   };
 
@@ -6438,8 +6747,20 @@ function wireStartScreens(): void {
           return;
         }
       } else {
-        await api.register(username, password, token, REFERRAL_SLUG, nativeAttestation);
-        trackMetaPixel('AccountCreated');
+        const email = ($('#login-email') as unknown as HTMLInputElement).value.trim();
+        const registered = await api.register(
+          username,
+          password,
+          email,
+          token,
+          REFERRAL_SLUG,
+          nativeAttestation,
+        );
+        trackMetaPixel(
+          'AccountCreated',
+          {},
+          registered.accountId ? { eventID: `acct_${registered.accountId}` } : undefined,
+        );
       }
     } catch (err) {
       // Auth itself failed (bad credentials, taken username, Turnstile reject…).
@@ -6460,6 +6781,7 @@ function wireStartScreens(): void {
   const loginForm = $('#login-panel') as HTMLFormElement;
   const userInput = $('#login-user') as HTMLInputElement;
   const passInput = $('#login-pass') as HTMLInputElement;
+  const emailInput = $('#login-email') as HTMLInputElement;
   const togglePassBtn = $('#btn-toggle-password') as HTMLButtonElement;
 
   // Wire password visibility toggle
@@ -6468,7 +6790,7 @@ function wireStartScreens(): void {
   });
 
   // Sync aria-invalid and error elements dynamically on interaction
-  [userInput, passInput].forEach((input) => {
+  [userInput, passInput, emailInput].forEach((input) => {
     input.addEventListener('blur', () => {
       const isValid = syncInputAriaState(input);
       input.classList.toggle('user-invalid-fallback', !isValid);
@@ -6501,6 +6823,22 @@ function wireStartScreens(): void {
     );
     $('#btn-auth-toggle').textContent = t(isLogin ? 'auth.createAccount' : 'auth.logIn');
     passInput.setAttribute('autocomplete', isLogin ? 'current-password' : 'new-password');
+    // Email is mandatory at signup only: show + require it in register mode, hide +
+    // drop `required` in login mode so it never blocks a login submit. (An element
+    // inside a display:none wrapper is still constraint-validated, so we toggle
+    // `required` on the input itself, not just the wrapper's `hidden`.)
+    const emailField = $('#login-email-field') as HTMLElement;
+    const emailInput = $('#login-email') as HTMLInputElement;
+    emailField.hidden = isLogin;
+    if (isLogin) {
+      emailInput.removeAttribute('required');
+      emailInput.classList.remove('user-invalid-fallback');
+      emailInput.removeAttribute('aria-invalid');
+      const emailErr = $('#login-email-error') as HTMLElement | null;
+      if (emailErr) emailErr.style.display = 'none';
+    } else {
+      emailInput.setAttribute('required', '');
+    }
     loginError('');
   };
   authModeApply = setAuthMode;
@@ -6914,6 +7252,7 @@ function wireStartScreens(): void {
   }
   wireDiscordCtaBanner();
   wireDiscordKeepModal();
+  wireRecoveryEmailModal();
 
   // First-time Discord login chooser: create a new account, or link an existing one.
   let pendingDiscordChoice: DiscordLoginChoice | null = null;
@@ -6930,7 +7269,9 @@ function wireStartScreens(): void {
     enterLoggedInChrome();
     void refreshWalletLinkStatus();
     void refreshGithubLinkStatus();
-    goToLoggedInPlay();
+    // A Discord login usually captured the email already, but confirm and prompt
+    // if it did not (e.g. the address was missing on the Discord account).
+    void maybePromptRecoveryEmail().then(() => goToLoggedInPlay());
   };
   const onDiscordChoiceError = (err: unknown) => {
     // A dead/used pending token (400) can't be retried: clear it and ask the player
@@ -7073,7 +7414,9 @@ function wireStartScreens(): void {
     void refreshWalletLinkStatus();
     void refreshGithubLinkStatus();
     // (Discord status is refreshed by enterLoggedInChrome above.)
-    if (discordOnboarding) enterOnlinePlayFlow();
+    // A just-completed Discord login lands straight in play; capture a recovery
+    // email first if the Discord grant did not provide one.
+    if (discordOnboarding) void maybePromptRecoveryEmail().then(() => enterOnlinePlayFlow());
     if (isDesktopLoginPage()) void completeDesktopBrowserLogin();
   } else {
     enterLoggedOutChrome();
@@ -7351,6 +7694,21 @@ function fadeOutHomepageMusic(durationMs = 1600): void {
   }
 })();
 
-startSitePresence('home');
-wireStartScreens();
-initHomepageMusic();
+// Editor play-test handoff: if the map editor stored a custom world and sent us
+// here, boot straight into that offline world and skip the start screen. Any
+// malformed/absent request falls through to the normal home flow.
+const editorPlaytest = takeEditorPlaytestRequest();
+if (editorPlaytest) {
+  startSitePresence('home');
+  void startOffline(
+    editorPlaytest.playerClass,
+    editorPlaytest.playerName,
+    0,
+    editorPlaytest.content,
+    editorPlaytest.seed,
+  );
+} else {
+  startSitePresence('home');
+  wireStartScreens();
+  initHomepageMusic();
+}

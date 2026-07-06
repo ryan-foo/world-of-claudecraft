@@ -10,13 +10,13 @@
     "fiesta lifesteal augment arm (~5499)",
     "multi-player fiesta meta"
   ],
-  "draws": 524,
-  "drawDigest": "1731ce7a",
+  "draws": 523,
+  "drawDigest": "1bff173c",
   "frames": [
     {
       "tick": 0,
       "time": 0,
-      "nextId": 389,
+      "nextId": 400,
       "state": "5bc471b0",
       "events": "741638a5",
       "rng": {
@@ -30,9 +30,9 @@
     {
       "tick": 25,
       "time": 1.25,
-      "nextId": 393,
-      "state": "19ef2d2e",
-      "events": "0e7699f8",
+      "nextId": 404,
+      "state": "43f78479",
+      "events": "a1a98eff",
       "rng": {
         "draws": 0,
         "digest": "811c9dc5"
@@ -41,9 +41,9 @@
     {
       "tick": 50,
       "time": 2.5,
-      "nextId": 393,
-      "state": "d27fa60a",
-      "events": "536fe27e",
+      "nextId": 404,
+      "state": "f66a177b",
+      "events": "6e60008d",
       "rng": {
         "draws": 28,
         "digest": "35d4471d"
@@ -52,9 +52,9 @@
     {
       "tick": 75,
       "time": 3.75,
-      "nextId": 393,
-      "state": "799da0fe",
-      "events": "09b268e6",
+      "nextId": 404,
+      "state": "325cfdf9",
+      "events": "9b3dbf7d",
       "rng": {
         "draws": 138,
         "digest": "22786cdd"
@@ -63,9 +63,9 @@
     {
       "tick": 100,
       "time": 5,
-      "nextId": 393,
-      "state": "31e8c18e",
-      "events": "df43dd26",
+      "nextId": 404,
+      "state": "f7f25b53",
+      "events": "e324e10d",
       "rng": {
         "draws": 294,
         "digest": "5f2d9bca"
@@ -74,9 +74,9 @@
     {
       "tick": 101,
       "time": 5.05,
-      "nextId": 393,
-      "state": "ee1496f1",
-      "events": "7c1828ad",
+      "nextId": 404,
+      "state": "73b02664",
+      "events": "eac8ab97",
       "rng": {
         "draws": 300,
         "digest": "bf906891"
@@ -87,14 +87,21 @@
           "activeLoadout": -1,
           "arena2v2Rating": 1500,
           "arenaRating": 1500,
+          "bags": [
+            null,
+            null,
+            null,
+            null
+          ],
           "cls": "warrior",
           "companionUpgrades": {},
           "counters": {
             "damageDealt": 50
           },
+          "craftSkills": {},
           "delveClears": {},
           "delveDaily": {},
-          "entityId": 389,
+          "entityId": 400,
           "equipment": {
             "chest": "recruit_tunic",
             "mainhand": "worn_sword"
@@ -106,14 +113,23 @@
               "ranks": {}
             }
           },
+          "gatheringProficiency": {},
+          "inventory": [
+            {
+              "count": 5,
+              "itemId": "baked_bread"
+            }
+          ],
+          "mailWelcomed": true,
+          "nodeHarvestReadyAt": {},
           "talents": {
-            "rows": {
-              "5": "war_r5_juggernaut",
-              "8": "war_r8_pummel",
-              "11": "war_r11_berserker_rage",
-              "14": "war_r14_mortal_strike",
-              "17": "war_r17_shield_wall",
-              "20": "war_r20_bladestorm"
+            "choices": {},
+            "ranks": {
+              "war_cruelty": 3,
+              "war_deflection": 1,
+              "war_imp_heroic_strike": 2,
+              "war_imp_thunder_clap": 2,
+              "war_toughness": 3
             },
             "spec": "arms"
           }
@@ -122,12 +138,19 @@
           "activeLoadout": -1,
           "arena2v2Rating": 1500,
           "arenaRating": 1500,
+          "bags": [
+            null,
+            null,
+            null,
+            null
+          ],
           "cls": "mage",
           "companionUpgrades": {},
           "counters": {},
+          "craftSkills": {},
           "delveClears": {},
           "delveDaily": {},
-          "entityId": 390,
+          "entityId": 401,
           "equipment": {
             "chest": "apprentice_robe",
             "mainhand": "gnarled_staff"
@@ -139,14 +162,27 @@
               "ranks": {}
             }
           },
+          "gatheringProficiency": {},
+          "inventory": [
+            {
+              "count": 5,
+              "itemId": "baked_bread"
+            },
+            {
+              "count": 5,
+              "itemId": "spring_water"
+            }
+          ],
+          "mailWelcomed": true,
+          "nodeHarvestReadyAt": {},
           "talents": {
-            "rows": {
-              "5": "mag_r5_firestarter",
-              "8": "mag_r8_counterspell",
-              "11": "mag_r11_cone_of_cold",
-              "14": "mag_r14_presence_of_mind",
-              "17": "mag_r17_blink",
-              "20": "mag_r20_deep_freeze"
+            "choices": {},
+            "ranks": {
+              "mag_arcane_focus": 3,
+              "mag_elemental_precision": 3,
+              "mag_flame_throwing": 2,
+              "mag_ice_shards": 1,
+              "mag_wand_specialization": 2
             },
             "spec": "arcane"
           }
@@ -155,14 +191,21 @@
           "activeLoadout": -1,
           "arena2v2Rating": 1500,
           "arenaRating": 1500,
+          "bags": [
+            null,
+            null,
+            null,
+            null
+          ],
           "cls": "rogue",
           "companionUpgrades": {},
           "counters": {
             "damageTaken": 50
           },
+          "craftSkills": {},
           "delveClears": {},
           "delveDaily": {},
-          "entityId": 391,
+          "entityId": 402,
           "equipment": {
             "chest": "footpad_jerkin",
             "mainhand": "rusty_dagger"
@@ -174,14 +217,23 @@
               "ranks": {}
             }
           },
+          "gatheringProficiency": {},
+          "inventory": [
+            {
+              "count": 5,
+              "itemId": "baked_bread"
+            }
+          ],
+          "mailWelcomed": true,
+          "nodeHarvestReadyAt": {},
           "talents": {
-            "rows": {
-              "5": "rog_r5_relentless_strikes",
-              "8": "rog_r8_kick",
-              "11": "rog_r11_preparation",
-              "14": "rog_r14_seal_fate",
-              "17": "rog_r17_cloak_of_shadows",
-              "20": "rog_r20_shadowstep"
+            "choices": {},
+            "ranks": {
+              "rog_camouflage": 2,
+              "rog_deflection": 1,
+              "rog_imp_sinister": 2,
+              "rog_lightning_reflexes": 3,
+              "rog_malice": 3
             },
             "spec": "assassination"
           }
@@ -190,12 +242,19 @@
           "activeLoadout": -1,
           "arena2v2Rating": 1500,
           "arenaRating": 1500,
+          "bags": [
+            null,
+            null,
+            null,
+            null
+          ],
           "cls": "hunter",
           "companionUpgrades": {},
           "counters": {},
+          "craftSkills": {},
           "delveClears": {},
           "delveDaily": {},
-          "entityId": 392,
+          "entityId": 403,
           "equipment": {
             "chest": "footpad_jerkin",
             "mainhand": "rusty_hatchet"
@@ -207,14 +266,27 @@
               "ranks": {}
             }
           },
+          "gatheringProficiency": {},
+          "inventory": [
+            {
+              "count": 5,
+              "itemId": "baked_bread"
+            },
+            {
+              "count": 5,
+              "itemId": "spring_water"
+            }
+          ],
+          "mailWelcomed": true,
+          "nodeHarvestReadyAt": {},
           "talents": {
-            "rows": {
-              "5": "hun_r5_improved_serpent_sting",
-              "8": "hun_r8_counter_shot",
-              "11": "hun_r11_mend_pet",
-              "14": "hun_r14_multi_shot",
-              "17": "hun_r17_deterrence",
-              "20": "hun_r20_improved_volley"
+            "choices": {},
+            "ranks": {
+              "hun_deflection": 1,
+              "hun_efficiency": 2,
+              "hun_endurance_training": 3,
+              "hun_imp_hawk": 2,
+              "hun_lethal_shots": 3
             },
             "spec": "beast_mastery"
           }
@@ -224,12 +296,13 @@
         {
           "aiState": "idle",
           "attackPower": 122,
-          "critChance": 0.0695,
+          "comboUntil": -1,
+          "critChance": 0.0995,
           "detonateTimer": "Infinity",
-          "dodgeChance": 0.0695,
+          "dodgeChance": 0.0795,
           "fiveSecondRule": 104.05,
           "hp": 812,
-          "id": 389,
+          "id": 400,
           "inCombat": true,
           "kind": "player",
           "level": 20,
@@ -255,7 +328,7 @@
           "spellPower": 5,
           "stats": {
             "agi": 39,
-            "armor": 376,
+            "armor": 421,
             "int": 10,
             "spi": 11,
             "sta": 60,
@@ -270,19 +343,20 @@
         },
         {
           "aiState": "idle",
-          "attackPower": 10,
+          "attackPower": 22,
           "combatTimer": 99,
-          "critChance": 0.056,
+          "comboUntil": -1,
+          "critChance": 0.066,
           "detonateTimer": "Infinity",
           "dodgeChance": 0.056,
           "fiveSecondRule": 104.05,
           "hp": 418,
-          "id": 390,
+          "id": 401,
           "kind": "player",
           "level": 20,
           "lootFfaTimer": "Infinity",
           "maxHp": 418,
-          "maxResource": 1566,
+          "maxResource": 1671,
           "moveSpeed": 7,
           "onGround": true,
           "overpowerUntil": -1,
@@ -292,18 +366,18 @@
             "z": -1264
           },
           "potionCooldownUntil": -1,
-          "resource": 1566,
+          "resource": 1671,
           "resourceType": "mana",
           "spawnPos": {
             "x": 2,
             "y": 1.5,
             "z": -2
           },
-          "spellPower": 43,
+          "spellPower": 47,
           "stats": {
             "agi": 12,
             "armor": 133,
-            "int": 86,
+            "int": 93,
             "spi": 60,
             "sta": 33,
             "str": 10
@@ -317,17 +391,18 @@
         },
         {
           "aiState": "idle",
-          "attackPower": 118,
+          "attackPower": 125,
           "castRemaining": 2.5,
           "castTotal": 2.5,
           "castingAbility": "fireball",
-          "critChance": 0.121,
+          "comboUntil": -1,
+          "critChance": 0.1545,
           "detonateTimer": "Infinity",
-          "dodgeChance": 0.091,
+          "dodgeChance": 0.1345,
           "facing": 3.141593,
           "fiveSecondRule": 104.05,
           "hp": 4950,
-          "id": 391,
+          "id": 402,
           "inCombat": true,
           "kind": "player",
           "level": 20,
@@ -352,8 +427,8 @@
           },
           "spellPower": 6,
           "stats": {
-            "agi": 82,
-            "armor": 370,
+            "agi": 89,
+            "armor": 384,
             "int": 11,
             "spi": 12,
             "sta": 36,
@@ -369,19 +444,20 @@
         },
         {
           "aiState": "idle",
-          "attackPower": 124,
+          "attackPower": 141,
           "combatTimer": 99,
-          "critChance": 0.091,
+          "comboUntil": -1,
+          "critChance": 0.121,
           "detonateTimer": "Infinity",
-          "dodgeChance": 0.091,
+          "dodgeChance": 0.101,
           "facing": 3.141593,
           "fiveSecondRule": 104.05,
-          "hp": 783,
-          "id": 392,
+          "hp": 848,
+          "id": 403,
           "kind": "player",
           "level": 20,
           "lootFfaTimer": "Infinity",
-          "maxHp": 783,
+          "maxHp": 848,
           "maxResource": 622,
           "moveSpeed": 7,
           "onGround": true,
@@ -392,7 +468,7 @@
             "z": -1232
           },
           "potionCooldownUntil": -1,
-          "rangedPower": 177,
+          "rangedPower": 194,
           "resource": 622,
           "resourceType": "mana",
           "spawnPos": {
@@ -406,7 +482,7 @@
             "armor": 375,
             "int": 32,
             "spi": 33,
-            "sta": 57,
+            "sta": 63,
             "str": 33
           },
           "templateId": "hunter",
@@ -421,9 +497,9 @@
     {
       "tick": 101,
       "time": 5.05,
-      "nextId": 393,
-      "state": "8d9187c5",
-      "events": "b5892330",
+      "nextId": 404,
+      "state": "0f035ad6",
+      "events": "abc18e50",
       "rng": {
         "draws": 300,
         "digest": "bf906891"
@@ -434,14 +510,21 @@
           "activeLoadout": -1,
           "arena2v2Rating": 1500,
           "arenaRating": 1500,
+          "bags": [
+            null,
+            null,
+            null,
+            null
+          ],
           "cls": "warrior",
           "companionUpgrades": {},
           "counters": {
             "damageDealt": 100
           },
+          "craftSkills": {},
           "delveClears": {},
           "delveDaily": {},
-          "entityId": 389,
+          "entityId": 400,
           "equipment": {
             "chest": "recruit_tunic",
             "mainhand": "worn_sword"
@@ -453,14 +536,23 @@
               "ranks": {}
             }
           },
+          "gatheringProficiency": {},
+          "inventory": [
+            {
+              "count": 5,
+              "itemId": "baked_bread"
+            }
+          ],
+          "mailWelcomed": true,
+          "nodeHarvestReadyAt": {},
           "talents": {
-            "rows": {
-              "5": "war_r5_juggernaut",
-              "8": "war_r8_pummel",
-              "11": "war_r11_berserker_rage",
-              "14": "war_r14_mortal_strike",
-              "17": "war_r17_shield_wall",
-              "20": "war_r20_bladestorm"
+            "choices": {},
+            "ranks": {
+              "war_cruelty": 3,
+              "war_deflection": 1,
+              "war_imp_heroic_strike": 2,
+              "war_imp_thunder_clap": 2,
+              "war_toughness": 3
             },
             "spec": "arms"
           }
@@ -469,12 +561,19 @@
           "activeLoadout": -1,
           "arena2v2Rating": 1500,
           "arenaRating": 1500,
+          "bags": [
+            null,
+            null,
+            null,
+            null
+          ],
           "cls": "mage",
           "companionUpgrades": {},
           "counters": {},
+          "craftSkills": {},
           "delveClears": {},
           "delveDaily": {},
-          "entityId": 390,
+          "entityId": 401,
           "equipment": {
             "chest": "apprentice_robe",
             "mainhand": "gnarled_staff"
@@ -486,14 +585,27 @@
               "ranks": {}
             }
           },
+          "gatheringProficiency": {},
+          "inventory": [
+            {
+              "count": 5,
+              "itemId": "baked_bread"
+            },
+            {
+              "count": 5,
+              "itemId": "spring_water"
+            }
+          ],
+          "mailWelcomed": true,
+          "nodeHarvestReadyAt": {},
           "talents": {
-            "rows": {
-              "5": "mag_r5_firestarter",
-              "8": "mag_r8_counterspell",
-              "11": "mag_r11_cone_of_cold",
-              "14": "mag_r14_presence_of_mind",
-              "17": "mag_r17_blink",
-              "20": "mag_r20_deep_freeze"
+            "choices": {},
+            "ranks": {
+              "mag_arcane_focus": 3,
+              "mag_elemental_precision": 3,
+              "mag_flame_throwing": 2,
+              "mag_ice_shards": 1,
+              "mag_wand_specialization": 2
             },
             "spec": "arcane"
           }
@@ -502,14 +614,21 @@
           "activeLoadout": -1,
           "arena2v2Rating": 1500,
           "arenaRating": 1500,
+          "bags": [
+            null,
+            null,
+            null,
+            null
+          ],
           "cls": "rogue",
           "companionUpgrades": {},
           "counters": {
             "damageTaken": 100
           },
+          "craftSkills": {},
           "delveClears": {},
           "delveDaily": {},
-          "entityId": 391,
+          "entityId": 402,
           "equipment": {
             "chest": "footpad_jerkin",
             "mainhand": "rusty_dagger"
@@ -521,14 +640,23 @@
               "ranks": {}
             }
           },
+          "gatheringProficiency": {},
+          "inventory": [
+            {
+              "count": 5,
+              "itemId": "baked_bread"
+            }
+          ],
+          "mailWelcomed": true,
+          "nodeHarvestReadyAt": {},
           "talents": {
-            "rows": {
-              "5": "rog_r5_relentless_strikes",
-              "8": "rog_r8_kick",
-              "11": "rog_r11_preparation",
-              "14": "rog_r14_seal_fate",
-              "17": "rog_r17_cloak_of_shadows",
-              "20": "rog_r20_shadowstep"
+            "choices": {},
+            "ranks": {
+              "rog_camouflage": 2,
+              "rog_deflection": 1,
+              "rog_imp_sinister": 2,
+              "rog_lightning_reflexes": 3,
+              "rog_malice": 3
             },
             "spec": "assassination"
           }
@@ -537,12 +665,19 @@
           "activeLoadout": -1,
           "arena2v2Rating": 1500,
           "arenaRating": 1500,
+          "bags": [
+            null,
+            null,
+            null,
+            null
+          ],
           "cls": "hunter",
           "companionUpgrades": {},
           "counters": {},
+          "craftSkills": {},
           "delveClears": {},
           "delveDaily": {},
-          "entityId": 392,
+          "entityId": 403,
           "equipment": {
             "chest": "footpad_jerkin",
             "mainhand": "rusty_hatchet"
@@ -554,14 +689,27 @@
               "ranks": {}
             }
           },
+          "gatheringProficiency": {},
+          "inventory": [
+            {
+              "count": 5,
+              "itemId": "baked_bread"
+            },
+            {
+              "count": 5,
+              "itemId": "spring_water"
+            }
+          ],
+          "mailWelcomed": true,
+          "nodeHarvestReadyAt": {},
           "talents": {
-            "rows": {
-              "5": "hun_r5_improved_serpent_sting",
-              "8": "hun_r8_counter_shot",
-              "11": "hun_r11_mend_pet",
-              "14": "hun_r14_multi_shot",
-              "17": "hun_r17_deterrence",
-              "20": "hun_r20_improved_volley"
+            "choices": {},
+            "ranks": {
+              "hun_deflection": 1,
+              "hun_efficiency": 2,
+              "hun_endurance_training": 3,
+              "hun_imp_hawk": 2,
+              "hun_lethal_shots": 3
             },
             "spec": "beast_mastery"
           }
@@ -571,12 +719,13 @@
         {
           "aiState": "idle",
           "attackPower": 122,
-          "critChance": 0.0695,
+          "comboUntil": -1,
+          "critChance": 0.0995,
           "detonateTimer": "Infinity",
-          "dodgeChance": 0.0695,
+          "dodgeChance": 0.0795,
           "fiveSecondRule": 104.05,
           "hp": 812,
-          "id": 389,
+          "id": 400,
           "inCombat": true,
           "kind": "player",
           "level": 20,
@@ -602,7 +751,7 @@
           "spellPower": 5,
           "stats": {
             "agi": 39,
-            "armor": 376,
+            "armor": 421,
             "int": 10,
             "spi": 11,
             "sta": 60,
@@ -617,19 +766,20 @@
         },
         {
           "aiState": "idle",
-          "attackPower": 10,
+          "attackPower": 22,
           "combatTimer": 99,
-          "critChance": 0.056,
+          "comboUntil": -1,
+          "critChance": 0.066,
           "detonateTimer": "Infinity",
           "dodgeChance": 0.056,
           "fiveSecondRule": 104.05,
           "hp": 418,
-          "id": 390,
+          "id": 401,
           "kind": "player",
           "level": 20,
           "lootFfaTimer": "Infinity",
           "maxHp": 418,
-          "maxResource": 1566,
+          "maxResource": 1671,
           "moveSpeed": 7,
           "onGround": true,
           "overpowerUntil": -1,
@@ -639,18 +789,18 @@
             "z": -1264
           },
           "potionCooldownUntil": -1,
-          "resource": 1566,
+          "resource": 1671,
           "resourceType": "mana",
           "spawnPos": {
             "x": 2,
             "y": 1.5,
             "z": -2
           },
-          "spellPower": 43,
+          "spellPower": 47,
           "stats": {
             "agi": 12,
             "armor": 133,
-            "int": 86,
+            "int": 93,
             "spi": 60,
             "sta": 33,
             "str": 10
@@ -664,15 +814,16 @@
         },
         {
           "aiState": "idle",
-          "attackPower": 118,
+          "attackPower": 125,
           "castTotal": 2.5,
-          "critChance": 0.121,
+          "comboUntil": -1,
+          "critChance": 0.1545,
           "detonateTimer": "Infinity",
-          "dodgeChance": 0.091,
+          "dodgeChance": 0.1345,
           "facing": 3.141593,
           "fiveSecondRule": 104.05,
           "hp": 4900,
-          "id": 391,
+          "id": 402,
           "inCombat": true,
           "kind": "player",
           "level": 20,
@@ -697,8 +848,8 @@
           },
           "spellPower": 6,
           "stats": {
-            "agi": 82,
-            "armor": 370,
+            "agi": 89,
+            "armor": 384,
             "int": 11,
             "spi": 12,
             "sta": 36,
@@ -714,19 +865,20 @@
         },
         {
           "aiState": "idle",
-          "attackPower": 124,
+          "attackPower": 141,
           "combatTimer": 99,
-          "critChance": 0.091,
+          "comboUntil": -1,
+          "critChance": 0.121,
           "detonateTimer": "Infinity",
-          "dodgeChance": 0.091,
+          "dodgeChance": 0.101,
           "facing": 3.141593,
           "fiveSecondRule": 104.05,
-          "hp": 783,
-          "id": 392,
+          "hp": 848,
+          "id": 403,
           "kind": "player",
           "level": 20,
           "lootFfaTimer": "Infinity",
-          "maxHp": 783,
+          "maxHp": 848,
           "maxResource": 622,
           "moveSpeed": 7,
           "onGround": true,
@@ -737,7 +889,7 @@
             "z": -1232
           },
           "potionCooldownUntil": -1,
-          "rangedPower": 177,
+          "rangedPower": 194,
           "resource": 622,
           "resourceType": "mana",
           "spawnPos": {
@@ -751,7 +903,7 @@
             "armor": 375,
             "int": 32,
             "spi": 33,
-            "sta": 57,
+            "sta": 63,
             "str": 33
           },
           "templateId": "hunter",
@@ -766,9 +918,9 @@
     {
       "tick": 101,
       "time": 5.05,
-      "nextId": 393,
-      "state": "a7b9ab7b",
-      "events": "291a7b31",
+      "nextId": 404,
+      "state": "51a44bb2",
+      "events": "d24eb35d",
       "rng": {
         "draws": 300,
         "digest": "bf906891"
@@ -779,15 +931,22 @@
           "activeLoadout": -1,
           "arena2v2Rating": 1500,
           "arenaRating": 1500,
+          "bags": [
+            null,
+            null,
+            null,
+            null
+          ],
           "cls": "warrior",
           "companionUpgrades": {},
           "counters": {
             "damageDealt": 100,
             "kills": 1
           },
+          "craftSkills": {},
           "delveClears": {},
           "delveDaily": {},
-          "entityId": 389,
+          "entityId": 400,
           "equipment": {
             "chest": "recruit_tunic",
             "mainhand": "worn_sword"
@@ -799,14 +958,23 @@
               "ranks": {}
             }
           },
+          "gatheringProficiency": {},
+          "inventory": [
+            {
+              "count": 5,
+              "itemId": "baked_bread"
+            }
+          ],
+          "mailWelcomed": true,
+          "nodeHarvestReadyAt": {},
           "talents": {
-            "rows": {
-              "5": "war_r5_juggernaut",
-              "8": "war_r8_pummel",
-              "11": "war_r11_berserker_rage",
-              "14": "war_r14_mortal_strike",
-              "17": "war_r17_shield_wall",
-              "20": "war_r20_bladestorm"
+            "choices": {},
+            "ranks": {
+              "war_cruelty": 3,
+              "war_deflection": 1,
+              "war_imp_heroic_strike": 2,
+              "war_imp_thunder_clap": 2,
+              "war_toughness": 3
             },
             "spec": "arms"
           }
@@ -815,12 +983,19 @@
           "activeLoadout": -1,
           "arena2v2Rating": 1500,
           "arenaRating": 1500,
+          "bags": [
+            null,
+            null,
+            null,
+            null
+          ],
           "cls": "mage",
           "companionUpgrades": {},
           "counters": {},
+          "craftSkills": {},
           "delveClears": {},
           "delveDaily": {},
-          "entityId": 390,
+          "entityId": 401,
           "equipment": {
             "chest": "apprentice_robe",
             "mainhand": "gnarled_staff"
@@ -832,14 +1007,27 @@
               "ranks": {}
             }
           },
+          "gatheringProficiency": {},
+          "inventory": [
+            {
+              "count": 5,
+              "itemId": "baked_bread"
+            },
+            {
+              "count": 5,
+              "itemId": "spring_water"
+            }
+          ],
+          "mailWelcomed": true,
+          "nodeHarvestReadyAt": {},
           "talents": {
-            "rows": {
-              "5": "mag_r5_firestarter",
-              "8": "mag_r8_counterspell",
-              "11": "mag_r11_cone_of_cold",
-              "14": "mag_r14_presence_of_mind",
-              "17": "mag_r17_blink",
-              "20": "mag_r20_deep_freeze"
+            "choices": {},
+            "ranks": {
+              "mag_arcane_focus": 3,
+              "mag_elemental_precision": 3,
+              "mag_flame_throwing": 2,
+              "mag_ice_shards": 1,
+              "mag_wand_specialization": 2
             },
             "spec": "arcane"
           }
@@ -848,15 +1036,22 @@
           "activeLoadout": -1,
           "arena2v2Rating": 1500,
           "arenaRating": 1500,
+          "bags": [
+            null,
+            null,
+            null,
+            null
+          ],
           "cls": "rogue",
           "companionUpgrades": {},
           "counters": {
             "damageTaken": 100,
             "deaths": 1
           },
+          "craftSkills": {},
           "delveClears": {},
           "delveDaily": {},
-          "entityId": 391,
+          "entityId": 402,
           "equipment": {
             "chest": "footpad_jerkin",
             "mainhand": "rusty_dagger"
@@ -868,14 +1063,23 @@
               "ranks": {}
             }
           },
+          "gatheringProficiency": {},
+          "inventory": [
+            {
+              "count": 5,
+              "itemId": "baked_bread"
+            }
+          ],
+          "mailWelcomed": true,
+          "nodeHarvestReadyAt": {},
           "talents": {
-            "rows": {
-              "5": "rog_r5_relentless_strikes",
-              "8": "rog_r8_kick",
-              "11": "rog_r11_preparation",
-              "14": "rog_r14_seal_fate",
-              "17": "rog_r17_cloak_of_shadows",
-              "20": "rog_r20_shadowstep"
+            "choices": {},
+            "ranks": {
+              "rog_camouflage": 2,
+              "rog_deflection": 1,
+              "rog_imp_sinister": 2,
+              "rog_lightning_reflexes": 3,
+              "rog_malice": 3
             },
             "spec": "assassination"
           }
@@ -884,12 +1088,19 @@
           "activeLoadout": -1,
           "arena2v2Rating": 1500,
           "arenaRating": 1500,
+          "bags": [
+            null,
+            null,
+            null,
+            null
+          ],
           "cls": "hunter",
           "companionUpgrades": {},
           "counters": {},
+          "craftSkills": {},
           "delveClears": {},
           "delveDaily": {},
-          "entityId": 392,
+          "entityId": 403,
           "equipment": {
             "chest": "footpad_jerkin",
             "mainhand": "rusty_hatchet"
@@ -901,14 +1112,27 @@
               "ranks": {}
             }
           },
+          "gatheringProficiency": {},
+          "inventory": [
+            {
+              "count": 5,
+              "itemId": "baked_bread"
+            },
+            {
+              "count": 5,
+              "itemId": "spring_water"
+            }
+          ],
+          "mailWelcomed": true,
+          "nodeHarvestReadyAt": {},
           "talents": {
-            "rows": {
-              "5": "hun_r5_improved_serpent_sting",
-              "8": "hun_r8_counter_shot",
-              "11": "hun_r11_mend_pet",
-              "14": "hun_r14_multi_shot",
-              "17": "hun_r17_deterrence",
-              "20": "hun_r20_improved_volley"
+            "choices": {},
+            "ranks": {
+              "hun_deflection": 1,
+              "hun_efficiency": 2,
+              "hun_endurance_training": 3,
+              "hun_imp_hawk": 2,
+              "hun_lethal_shots": 3
             },
             "spec": "beast_mastery"
           }
@@ -918,12 +1142,13 @@
         {
           "aiState": "idle",
           "attackPower": 122,
-          "critChance": 0.0695,
+          "comboUntil": -1,
+          "critChance": 0.0995,
           "detonateTimer": "Infinity",
-          "dodgeChance": 0.0695,
+          "dodgeChance": 0.0795,
           "fiveSecondRule": 104.05,
           "hp": 812,
-          "id": 389,
+          "id": 400,
           "inCombat": true,
           "kind": "player",
           "level": 20,
@@ -949,7 +1174,7 @@
           "spellPower": 5,
           "stats": {
             "agi": 39,
-            "armor": 376,
+            "armor": 421,
             "int": 10,
             "spi": 11,
             "sta": 60,
@@ -964,19 +1189,20 @@
         },
         {
           "aiState": "idle",
-          "attackPower": 10,
+          "attackPower": 22,
           "combatTimer": 99,
-          "critChance": 0.056,
+          "comboUntil": -1,
+          "critChance": 0.066,
           "detonateTimer": "Infinity",
           "dodgeChance": 0.056,
           "fiveSecondRule": 104.05,
           "hp": 418,
-          "id": 390,
+          "id": 401,
           "kind": "player",
           "level": 20,
           "lootFfaTimer": "Infinity",
           "maxHp": 418,
-          "maxResource": 1566,
+          "maxResource": 1671,
           "moveSpeed": 7,
           "onGround": true,
           "overpowerUntil": -1,
@@ -986,18 +1212,18 @@
             "z": -1264
           },
           "potionCooldownUntil": -1,
-          "resource": 1566,
+          "resource": 1671,
           "resourceType": "mana",
           "spawnPos": {
             "x": 2,
             "y": 1.5,
             "z": -2
           },
-          "spellPower": 43,
+          "spellPower": 47,
           "stats": {
             "agi": 12,
             "armor": 133,
-            "int": 86,
+            "int": 93,
             "spi": 60,
             "sta": 33,
             "str": 10
@@ -1011,15 +1237,16 @@
         },
         {
           "aiState": "idle",
-          "attackPower": 118,
+          "attackPower": 125,
           "castTotal": 2,
-          "critChance": 0.121,
+          "comboUntil": -1,
+          "critChance": 0.1545,
           "dead": true,
           "detonateTimer": "Infinity",
-          "dodgeChance": 0.091,
+          "dodgeChance": 0.1345,
           "facing": 3.141593,
           "fiveSecondRule": 104.05,
-          "id": 391,
+          "id": 402,
           "inCombat": true,
           "kind": "player",
           "level": 20,
@@ -1044,8 +1271,8 @@
           },
           "spellPower": 6,
           "stats": {
-            "agi": 82,
-            "armor": 370,
+            "agi": 89,
+            "armor": 384,
             "int": 11,
             "spi": 12,
             "sta": 36,
@@ -1061,19 +1288,20 @@
         },
         {
           "aiState": "idle",
-          "attackPower": 124,
+          "attackPower": 141,
           "combatTimer": 99,
-          "critChance": 0.091,
+          "comboUntil": -1,
+          "critChance": 0.121,
           "detonateTimer": "Infinity",
-          "dodgeChance": 0.091,
+          "dodgeChance": 0.101,
           "facing": 3.141593,
           "fiveSecondRule": 104.05,
-          "hp": 783,
-          "id": 392,
+          "hp": 848,
+          "id": 403,
           "kind": "player",
           "level": 20,
           "lootFfaTimer": "Infinity",
-          "maxHp": 783,
+          "maxHp": 848,
           "maxResource": 622,
           "moveSpeed": 7,
           "onGround": true,
@@ -1084,7 +1312,7 @@
             "z": -1232
           },
           "potionCooldownUntil": -1,
-          "rangedPower": 177,
+          "rangedPower": 194,
           "resource": 622,
           "resourceType": "mana",
           "spawnPos": {
@@ -1098,7 +1326,7 @@
             "armor": 375,
             "int": 32,
             "spi": 33,
-            "sta": 57,
+            "sta": 63,
             "str": 33
           },
           "templateId": "hunter",
@@ -1113,8 +1341,8 @@
     {
       "tick": 125,
       "time": 6.25,
-      "nextId": 393,
-      "state": "4022af55",
+      "nextId": 404,
+      "state": "f95b8948",
       "events": "741638a5",
       "rng": {
         "draws": 429,
@@ -1124,12 +1352,12 @@
     {
       "tick": 142,
       "time": 7.1,
-      "nextId": 393,
-      "state": "0037f033",
+      "nextId": 404,
+      "state": "50b95d20",
       "events": "741638a5",
       "rng": {
-        "draws": 524,
-        "digest": "1731ce7a"
+        "draws": 523,
+        "digest": "1bff173c"
       },
       "label": "final",
       "players": [
@@ -1137,15 +1365,22 @@
           "activeLoadout": -1,
           "arena2v2Rating": 1500,
           "arenaRating": 1500,
+          "bags": [
+            null,
+            null,
+            null,
+            null
+          ],
           "cls": "warrior",
           "companionUpgrades": {},
           "counters": {
             "damageDealt": 100,
             "kills": 1
           },
+          "craftSkills": {},
           "delveClears": {},
           "delveDaily": {},
-          "entityId": 389,
+          "entityId": 400,
           "equipment": {
             "chest": "recruit_tunic",
             "mainhand": "worn_sword"
@@ -1157,14 +1392,23 @@
               "ranks": {}
             }
           },
+          "gatheringProficiency": {},
+          "inventory": [
+            {
+              "count": 5,
+              "itemId": "baked_bread"
+            }
+          ],
+          "mailWelcomed": true,
+          "nodeHarvestReadyAt": {},
           "talents": {
-            "rows": {
-              "5": "war_r5_juggernaut",
-              "8": "war_r8_pummel",
-              "11": "war_r11_berserker_rage",
-              "14": "war_r14_mortal_strike",
-              "17": "war_r17_shield_wall",
-              "20": "war_r20_bladestorm"
+            "choices": {},
+            "ranks": {
+              "war_cruelty": 3,
+              "war_deflection": 1,
+              "war_imp_heroic_strike": 2,
+              "war_imp_thunder_clap": 2,
+              "war_toughness": 3
             },
             "spec": "arms"
           }
@@ -1173,12 +1417,19 @@
           "activeLoadout": -1,
           "arena2v2Rating": 1500,
           "arenaRating": 1500,
+          "bags": [
+            null,
+            null,
+            null,
+            null
+          ],
           "cls": "mage",
           "companionUpgrades": {},
           "counters": {},
+          "craftSkills": {},
           "delveClears": {},
           "delveDaily": {},
-          "entityId": 390,
+          "entityId": 401,
           "equipment": {
             "chest": "apprentice_robe",
             "mainhand": "gnarled_staff"
@@ -1190,14 +1441,27 @@
               "ranks": {}
             }
           },
+          "gatheringProficiency": {},
+          "inventory": [
+            {
+              "count": 5,
+              "itemId": "baked_bread"
+            },
+            {
+              "count": 5,
+              "itemId": "spring_water"
+            }
+          ],
+          "mailWelcomed": true,
+          "nodeHarvestReadyAt": {},
           "talents": {
-            "rows": {
-              "5": "mag_r5_firestarter",
-              "8": "mag_r8_counterspell",
-              "11": "mag_r11_cone_of_cold",
-              "14": "mag_r14_presence_of_mind",
-              "17": "mag_r17_blink",
-              "20": "mag_r20_deep_freeze"
+            "choices": {},
+            "ranks": {
+              "mag_arcane_focus": 3,
+              "mag_elemental_precision": 3,
+              "mag_flame_throwing": 2,
+              "mag_ice_shards": 1,
+              "mag_wand_specialization": 2
             },
             "spec": "arcane"
           }
@@ -1206,15 +1470,22 @@
           "activeLoadout": -1,
           "arena2v2Rating": 1500,
           "arenaRating": 1500,
+          "bags": [
+            null,
+            null,
+            null,
+            null
+          ],
           "cls": "rogue",
           "companionUpgrades": {},
           "counters": {
             "damageTaken": 100,
             "deaths": 1
           },
+          "craftSkills": {},
           "delveClears": {},
           "delveDaily": {},
-          "entityId": 391,
+          "entityId": 402,
           "equipment": {
             "chest": "footpad_jerkin",
             "mainhand": "rusty_dagger"
@@ -1226,14 +1497,23 @@
               "ranks": {}
             }
           },
+          "gatheringProficiency": {},
+          "inventory": [
+            {
+              "count": 5,
+              "itemId": "baked_bread"
+            }
+          ],
+          "mailWelcomed": true,
+          "nodeHarvestReadyAt": {},
           "talents": {
-            "rows": {
-              "5": "rog_r5_relentless_strikes",
-              "8": "rog_r8_kick",
-              "11": "rog_r11_preparation",
-              "14": "rog_r14_seal_fate",
-              "17": "rog_r17_cloak_of_shadows",
-              "20": "rog_r20_shadowstep"
+            "choices": {},
+            "ranks": {
+              "rog_camouflage": 2,
+              "rog_deflection": 1,
+              "rog_imp_sinister": 2,
+              "rog_lightning_reflexes": 3,
+              "rog_malice": 3
             },
             "spec": "assassination"
           }
@@ -1242,12 +1522,19 @@
           "activeLoadout": -1,
           "arena2v2Rating": 1500,
           "arenaRating": 1500,
+          "bags": [
+            null,
+            null,
+            null,
+            null
+          ],
           "cls": "hunter",
           "companionUpgrades": {},
           "counters": {},
+          "craftSkills": {},
           "delveClears": {},
           "delveDaily": {},
-          "entityId": 392,
+          "entityId": 403,
           "equipment": {
             "chest": "footpad_jerkin",
             "mainhand": "rusty_hatchet"
@@ -1259,14 +1546,27 @@
               "ranks": {}
             }
           },
+          "gatheringProficiency": {},
+          "inventory": [
+            {
+              "count": 5,
+              "itemId": "baked_bread"
+            },
+            {
+              "count": 5,
+              "itemId": "spring_water"
+            }
+          ],
+          "mailWelcomed": true,
+          "nodeHarvestReadyAt": {},
           "talents": {
-            "rows": {
-              "5": "hun_r5_improved_serpent_sting",
-              "8": "hun_r8_counter_shot",
-              "11": "hun_r11_mend_pet",
-              "14": "hun_r14_multi_shot",
-              "17": "hun_r17_deterrence",
-              "20": "hun_r20_improved_volley"
+            "choices": {},
+            "ranks": {
+              "hun_deflection": 1,
+              "hun_efficiency": 2,
+              "hun_endurance_training": 3,
+              "hun_imp_hawk": 2,
+              "hun_lethal_shots": 3
             },
             "spec": "beast_mastery"
           }
@@ -1277,12 +1577,13 @@
           "aiState": "idle",
           "attackPower": 122,
           "combatTimer": 2.05,
-          "critChance": 0.0695,
+          "comboUntil": -1,
+          "critChance": 0.0995,
           "detonateTimer": "Infinity",
-          "dodgeChance": 0.0695,
+          "dodgeChance": 0.0795,
           "fiveSecondRule": 106.1,
           "hp": 812,
-          "id": 389,
+          "id": 400,
           "inCombat": true,
           "kind": "player",
           "level": 20,
@@ -1308,7 +1609,7 @@
           "spellPower": 5,
           "stats": {
             "agi": 39,
-            "armor": 376,
+            "armor": 421,
             "int": 10,
             "spi": 11,
             "sta": 60,
@@ -1323,19 +1624,20 @@
         },
         {
           "aiState": "idle",
-          "attackPower": 10,
+          "attackPower": 22,
           "combatTimer": 101.05,
-          "critChance": 0.056,
+          "comboUntil": -1,
+          "critChance": 0.066,
           "detonateTimer": "Infinity",
           "dodgeChance": 0.056,
           "fiveSecondRule": 106.1,
           "hp": 418,
-          "id": 390,
+          "id": 401,
           "kind": "player",
           "level": 20,
           "lootFfaTimer": "Infinity",
           "maxHp": 418,
-          "maxResource": 1566,
+          "maxResource": 1671,
           "moveSpeed": 7,
           "onGround": true,
           "overpowerUntil": -1,
@@ -1345,18 +1647,18 @@
             "z": -1264
           },
           "potionCooldownUntil": -1,
-          "resource": 1566,
+          "resource": 1671,
           "resourceType": "mana",
           "spawnPos": {
             "x": 2,
             "y": 1.5,
             "z": -2
           },
-          "spellPower": 43,
+          "spellPower": 47,
           "stats": {
             "agi": 12,
             "armor": 133,
-            "int": 86,
+            "int": 93,
             "spi": 60,
             "sta": 33,
             "str": 10
@@ -1370,16 +1672,17 @@
         },
         {
           "aiState": "idle",
-          "attackPower": 118,
+          "attackPower": 125,
           "castTotal": 2,
           "combatTimer": 2.05,
-          "critChance": 0.121,
+          "comboUntil": -1,
+          "critChance": 0.1545,
           "dead": true,
           "detonateTimer": "Infinity",
-          "dodgeChance": 0.091,
+          "dodgeChance": 0.1345,
           "facing": 3.141593,
           "fiveSecondRule": 106.1,
-          "id": 391,
+          "id": 402,
           "inCombat": true,
           "kind": "player",
           "level": 20,
@@ -1404,8 +1707,8 @@
           },
           "spellPower": 6,
           "stats": {
-            "agi": 82,
-            "armor": 370,
+            "agi": 89,
+            "armor": 384,
             "int": 11,
             "spi": 12,
             "sta": 36,
@@ -1421,19 +1724,20 @@
         },
         {
           "aiState": "idle",
-          "attackPower": 124,
+          "attackPower": 141,
           "combatTimer": 101.05,
-          "critChance": 0.091,
+          "comboUntil": -1,
+          "critChance": 0.121,
           "detonateTimer": "Infinity",
-          "dodgeChance": 0.091,
+          "dodgeChance": 0.101,
           "facing": 3.141593,
           "fiveSecondRule": 106.1,
-          "hp": 783,
-          "id": 392,
+          "hp": 848,
+          "id": 403,
           "kind": "player",
           "level": 20,
           "lootFfaTimer": "Infinity",
-          "maxHp": 783,
+          "maxHp": 848,
           "maxResource": 622,
           "moveSpeed": 7,
           "onGround": true,
@@ -1444,7 +1748,7 @@
             "z": -1232
           },
           "potionCooldownUntil": -1,
-          "rangedPower": 177,
+          "rangedPower": 194,
           "resource": 622,
           "resourceType": "mana",
           "spawnPos": {
@@ -1458,7 +1762,7 @@
             "armor": 375,
             "int": 32,
             "spi": 33,
-            "sta": 57,
+            "sta": 63,
             "str": 33
           },
           "templateId": "hunter",
