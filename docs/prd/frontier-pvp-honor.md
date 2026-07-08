@@ -7,7 +7,7 @@
 | **Created** | 2026-07-03 |
 | **Design reference** | Classic-era Wintergrasp / world PvP zones (two teams, contested objectives, honor currency, timed zone events); the degen-gaming thesis and Cambria's extraction loop (risk-native design, seasons, tunable rake) for the stakes layer |
 | **Related systems** | Duel/arena hostility (`src/sim/social/duel.ts`, `src/sim/social/arena.ts`, `isHostileTo`), world boss (`src/sim/world_boss.ts`), rare spawns (`MobTemplate.rare`), currencies (`copper`, `delveMarks` on `CharacterState`), vendors (`NpcDef.vendorItems`), realms (`server/realm.ts`), instance x-bands (`src/sim/data.ts`), wallet verification (`docs/prd/woc/wallet-link.md`), headless RL env (`headless/`, `python/`) |
-| **Companion docs** | `docs/prd/badges.md` (deterministic-currency precedent), `docs/prd/heroic-mythic-dungeons.md`, `docs/prd/woc/holder-cosmetic-flair.md` |
+| **Companion docs** | `docs/prd/woc/holder-cosmetic-flair.md`. The deterministic-currency precedent is the existing `delveMarks` counter on `CharacterState` (see section 3), not a separate doc |
 | **Implementation handoff** | `docs/prd/FRONTIER_PHASE1_HANDOFF.md` (Phase 1 slices, verified hook points, executor routing) |
 
 ---
