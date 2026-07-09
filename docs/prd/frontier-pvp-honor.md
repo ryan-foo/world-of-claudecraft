@@ -514,3 +514,117 @@ Still open:
    together? (Lean: free first; it is the funnel and the playtest.)
 5. Mixed human/agent exhibition rules: same bracket, or agents handicapped
    (tick-rate budget, action-rate caps)?
+
+## 15. Variant: the FFA frozen island (no teams, pacts, betrayal)
+
+A sibling zone to the two-team Frontier above, added here rather than as its
+own PRD because it reuses every rail in sections 6 to 12 and only changes the
+social model. Frostreach is a *war*: two banners, a front line, base
+graveyards, a team score. The island is a *gold rush*: a newly discovered
+frozen island, dense with resources, no sides. Everyone is hostile by default,
+alliances are temporary and breakable, and the player who helped you clear a
+relic cache is the one who saps you at the evac beacon. Different fantasy,
+different math, same cargo/honor/$WOC plumbing. Ships as its own season format;
+when this section is silent, the rest of the PRD governs.
+
+### 15.1 What carries over unchanged
+Gear is account-bound and never drops; cargo is the only stake (5.4, 6). The
+token firewall (12.2), soulbound honor vs staked cargo (12.3), stake brackets
+and the level-20 gate (12.5), the agent server (12.6), the economy wind tunnel
+(12.7), and the regulatory posture (12.9) all apply as written. The island is
+a different arrangement of the same parts, not a different economy.
+
+### 15.2 Flagging becomes default-hostile
+There is no `frontierTeam` on the island. The Frontier hostility clause (5.2)
+is replaced by: two players in the zone are hostile unless they are in an
+active **pact**. The default relationship between any two players is enemy.
+Entry, the 10 s interruptible Leave channel, and no-hostility-bleed on exit
+carry over from 5.2. Pets and companions inherit their owner's pacts.
+
+### 15.3 Pacts: alliances you can break at any instant
+- A pact is a temporary, mutual, non-hostility agreement between players (cap a
+  pact group at around 5 so the island never collapses into one blob and the
+  FFA tension survives). Propose, accept, and you stop being hostile to each
+  other.
+- **Betrayal is a first-class move and it is instant.** Any member drops a pact
+  at any time, no channel and no cooldown, and is immediately hostile again.
+  The double-cross at the beacon is supposed to work. Open taste call: whether
+  the victim gets a tell (a brief on-screen flash the instant a pact drops, or
+  a sub-second draw animation on the betrayer), so that cooperation is
+  *possible* without being *safe*. We do not want a long betrayal cast that
+  removes the move.
+- Pacts are zone-only, drop on death or leave, and grant no shared reward
+  split beyond "we are not currently hostile."
+
+### 15.4 No team bases; extract to neutral beacons
+No Azure/Crimson graveyards. Death releases you to a rotating set of shoreline
+spawn points, never a fortified home base, so there is no safe turtle corner.
+Value is realized at **neutral extraction beacons** inland: reach one alive
+with cargo and channel to bank your haul toward the ladder. Beacons are the
+natural ambush and betrayal point, contested by design. Teleport-out still
+forfeits cargo (decision 2).
+
+### 15.5 Ganging up and betrayal are intended; wash-trading is staked-only
+Two behaviors get called "collusion" and they get opposite treatment.
+
+- **Ganging up, temporary alliances, and betrayal are the point.** Three
+  players team to drop a juiced solo and then knife each other over the satchel
+  at the beacon: that is the free content engine (12.8). It is fully allowed on
+  every tier and needs no special machinery. Greed self-polices it, because
+  allies have *opposing* interests over who actually walks out with the haul.
+- **Wash-trading is the only genuinely adversarial case, and it is different in
+  kind.** Two wallets cooperatively alternate kills to funnel value to one
+  predetermined winner (one person on two accounts, or a farmer feeding a
+  main). Betrayal does *not* police this, because the parties are not fighting
+  over the loot, they are cooperating to move it, so neither ever defects. It
+  looks like PvP but there is no contest.
+
+The relief valve: wash-trading only matters when real $WOC is on the line. In
+the free / play-stakes island there is nothing to launder, so it is just
+gameplay. Therefore:
+
+- The free FFA island ships with **zero anti-collusion machinery**. There is no
+  opposing-team loot gate to inherit (6.3 assumes teams that do not exist
+  here), no pact-based loot restrictions, no heuristics. Gang up, betray, feed
+  a friend: all allowed, all content.
+- Wash-trade defense is a **staked-season-only knob deferred to the wind
+  tunnel** (12.7), sitting next to the smurfing scenario (12.5), never in the
+  free loop. We pick no loot rule now. Candidate levers, recorded for that
+  later analysis and not adopted here: score-only cargo transfer (the killer
+  banks the victim's cargo *value*, but cannot hand specific units to a third
+  party) and wallet-age/history clustering on repeated A-kills-B-then-B-kills-A
+  pairs.
+
+### 15.6 The one open design problem: the shark and the fish
+Crits give per-hit variance but gear gap decides fights, so an open-loot island
+is more deterministic than a slot machine: the juiced player farms the fish and
+the fish leaves (the extraction death spiral the thesis warns about). Deposit
+brackets (12.5) answer this for *staked* play, but the *free / play-stakes* loop
+has no brackets to sort by, so the funnel can eat its own new players.
+Candidate: an optional gear-normalized ("tournament ruleset") island tier
+alongside a full-power tier, so a fresh level-20 has a lane where nerve beats
+gear score. Open question; measure new-player survival in the wind tunnel before
+committing.
+
+### 15.7 Agent-native, same as the war zone
+Agents are first-class here too (12.6): default-hostile FFA with breakable pacts
+is fully agent-completable (stat and dice checks, positioning, and risk
+judgment, never twitch skillshots), and the betrayal tell must not become a
+reflex test. A stakes island where the machine is a welcome main character is
+the one thing a bot-hostile competitor structurally cannot ship.
+
+### 15.8 Player-facing surfaces (delta from section 9)
+The Frontier HUD widget gains: active pact members and their state, pact
+propose/accept/break controls, default-hostile nameplates (everyone red unless
+pacted), and a kill/betrayal feed for the spectacle layer (12.8). New strings
+are English-only in the implementing PR; the maintainer fills locales at
+release. IWorld-first as in section 9.
+
+### 15.9 Open questions specific to the island
+1. The betrayal tell: instant with a victim flash, a sub-second draw tell, or
+   nothing? (Decides whether cooperation is ever worth attempting.)
+2. Pact group size cap, and whether pact groups can pact with each other
+   (coalitions) or only individuals.
+3. Free-loop shark/fish: ship a gear-normalized island tier, or lean on the
+   level-20 gate and let the wind tunnel measure survival first?
+4. Island name and cargo item names (new IP only; no WoW-derived naming).
