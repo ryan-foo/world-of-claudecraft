@@ -51,35 +51,50 @@ async function stageAndShot(tid, file, withBoss) {
       const sim = window.__game.sim;
       const ctx = sim.ctx;
       const p = sim.player;
-      // clear any previously staged mobs
+      // clear any previously staged mobs (the wounded boss included)
       for (const e of [...ctx.entities.values()]) {
-        if (e.kind === 'mob' && String(e.templateId).startsWith('nythraxis_heroic_')) {
+        if (
+          e.kind === 'mob' &&
+          (String(e.templateId).startsWith('nythraxis_heroic_') ||
+            e.templateId === 'nythraxis_scourge_of_thornpeak')
+        ) {
           ctx.entities.delete(e.id);
         }
       }
       const base = [...ctx.entities.values()].find((e) => e.kind === 'mob');
       if (!base) return false;
-      // Pin the player to a fixed origin each stage so all three add shots frame
-      // identically (the warrior otherwise chases the targeted add between shots).
-      window.__addShotOrigin = window.__addShotOrigin || { x: p.pos.x, y: p.pos.y, z: p.pos.z };
-      p.pos = { ...window.__addShotOrigin };
+      // Open grassland north of the starting town, the same stage the showcase
+      // shots use: no NPC nameplates or buildings in frame, player looking
+      // straight down +z at the posed add.
+      const g = sim.groundPos(60, 40);
+      p.pos = { x: g.x, y: g.y, z: g.z };
       p.prevPos = { ...p.pos };
+      p.vx = 0;
+      p.vy = 0;
+      p.vz = 0;
+      p.facing = 0;
       p.inCombat = false;
-      const cam = window.__game.camera || window.__game.renderer?.camera;
-      let fx = 0;
-      let fz = 1;
-      if (cam) {
-        fx = -Math.sin(cam.rotation?.y ?? 0);
-        fz = -Math.cos(cam.rotation?.y ?? 0);
-        const len = Math.hypot(fx, fz) || 1;
-        fx /= len;
-        fz /= len;
+      p.hp = p.maxHp;
+      // Clear wandering field mobs near the stage so only the add is in frame.
+      const baseKeep = [...ctx.entities.values()].find((e) => e.kind === 'mob');
+      for (const e of [...ctx.entities.values()]) {
+        if (e.kind !== 'mob' || e === baseKeep) continue;
+        const d = Math.hypot(e.pos.x - p.pos.x, e.pos.z - p.pos.z);
+        if (d < 70) ctx.entities.delete(e.id);
       }
+      const fx = 0;
+      const fz = 1;
       const spawn = (templateId, dx, dz, scale, hp) => {
         const m = structuredClone(base);
         m.id = ctx.nextId++;
         m.templateId = templateId;
-        m.name = templateId;
+        m.name =
+          {
+            nythraxis_heroic_warrior_add: 'Spirit of Aldren',
+            nythraxis_heroic_priest_add: 'Spirit of Malric',
+            nythraxis_heroic_rogue_add: 'Spirit of Voss',
+            nythraxis_scourge_of_thornpeak: 'Nythraxis, Scourge of Thornpeak',
+          }[templateId] ?? templateId;
         m.scale = scale;
         m.level = 22;
         m.maxHp = hp;
@@ -92,7 +107,8 @@ async function stageAndShot(tid, file, withBoss) {
         m.threat = new Map();
         const bx = p.pos.x + fx * 11 + dx;
         const bz = p.pos.z + fz * 11 + dz;
-        m.pos = { x: bx, y: p.pos.y, z: bz };
+        const mg = sim.groundPos(bx, bz);
+        m.pos = { x: bx, y: mg.y, z: bz };
         m.prevPos = { ...m.pos };
         m.spawnPos = { ...m.pos };
         m.facing = Math.atan2(p.pos.x - bx, p.pos.z - bz);
@@ -100,9 +116,18 @@ async function stageAndShot(tid, file, withBoss) {
         ctx.addEntity(m);
         return m.id;
       };
-      const addId = spawn(tid, 0, 0, 1.7, 6000);
+      // Real heroic-raid numbers (nythraxis_boss_arena tuning: level 22, health
+      // x1.6, on the 2.3x elite factor) and the real template scales, so the
+      // targeted frame reads the live fight's health pools.
+      const REAL = {
+        nythraxis_heroic_warrior_add: { hp: 2716, scale: 1.25 },
+        nythraxis_heroic_priest_add: { hp: 1376, scale: 1.18 },
+        nythraxis_heroic_rogue_add: { hp: 1568, scale: 1.12 },
+      };
+      const real = REAL[tid];
+      const addId = spawn(tid, 0, 0, real.scale, real.hp);
       if (withBoss) {
-        const bossId = spawn('nythraxis_scourge_of_thornpeak', -10, 12, 2.4, 300000);
+        const bossId = spawn('nythraxis_scourge_of_thornpeak', -10, 12, 3.1, 96000);
         const boss = ctx.entities.get(bossId);
         if (boss) boss.hp = Math.floor(boss.maxHp * 0.4); // wounded, so Malric heals it
       }
