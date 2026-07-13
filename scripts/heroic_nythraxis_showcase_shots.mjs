@@ -138,13 +138,16 @@ async function stageCourt(addIds, targetTid, extraTicks, bossHpFrac, closeUp) {
         return m.id;
       };
       const ids = {};
+      // Real heroic-raid numbers (nythraxis_boss_arena tuning: level 22, health
+      // x1.6, on the 2.3x elite factor): boss 96000 (60k normal x1.6), Aldren
+      // 2716, Malric 1376, Voss 1568. Scales are the real template scales.
       const bossId = spawn(
         'nythraxis_scourge_of_thornpeak',
         'Nythraxis, Scourge of Thornpeak',
-        0,
-        closeUp ? 13 : 17,
-        2.4,
-        300000,
+        closeUp ? 3 : 0,
+        closeUp ? 18 : 17,
+        3.1,
+        96000,
       );
       const boss = ctx.entities.get(bossId);
       // Wounded, so Malric channels. The Malric close-up stages ABOVE the
@@ -155,15 +158,54 @@ async function stageCourt(addIds, targetTid, extraTicks, bossHpFrac, closeUp) {
       // Malric spawns already inside his 6-unit heal standoff of the boss so the
       // channel starts without pathing (terrain colliders can pin a staged walk).
       const layout = closeUp
-        ? { nythraxis_heroic_priest_add: { name: 'Spirit of Malric', dx: -2, dz: 9 } }
+        ? {
+            nythraxis_heroic_priest_add: {
+              name: 'Spirit of Malric',
+              dx: -2,
+              dz: 15,
+              scale: 1.18,
+              hp: 1376,
+            },
+          }
         : {
-            nythraxis_heroic_warrior_add: { name: 'Spirit of Aldren', dx: -8, dz: 11 },
-            nythraxis_heroic_priest_add: { name: 'Spirit of Malric', dx: -1.5, dz: 13.5 },
-            nythraxis_heroic_rogue_add: { name: 'Spirit of Voss', dx: 8, dz: 11 },
+            nythraxis_heroic_warrior_add: {
+              name: 'Spirit of Aldren',
+              dx: -7,
+              dz: 10,
+              scale: 1.25,
+              hp: 2716,
+            },
+            nythraxis_heroic_priest_add: {
+              name: 'Spirit of Malric',
+              dx: -1.5,
+              dz: 13.5,
+              scale: 1.18,
+              hp: 1376,
+            },
+            nythraxis_heroic_rogue_add: {
+              name: 'Spirit of Voss',
+              dx: 7,
+              dz: 10,
+              scale: 1.12,
+              hp: 1568,
+            },
           };
       for (const tid of addIds) {
         const l = layout[tid];
-        ids[tid] = spawn(tid, l.name, l.dx, l.dz, 1.7, 6000, tid === 'nythraxis_heroic_priest_add');
+        const id = spawn(
+          tid,
+          l.name,
+          l.dx,
+          l.dz,
+          l.scale,
+          l.hp,
+          tid === 'nythraxis_heroic_priest_add',
+        );
+        // The heroic-instance spawn path stamps the arena health multiplier on
+        // every add; Malric's heal ticks read it.
+        const add = ctx.entities.get(id);
+        if (add) add.mechanicHealMult = 1.6;
+        ids[tid] = id;
       }
       const targetId = targetTid ? ids[targetTid] : null;
       p.targetId = targetId;
